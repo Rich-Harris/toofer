@@ -7,6 +7,7 @@
 	} from '$lib/webauthn';
 	import { getVaultList } from '$lib/storage';
 	import type { VaultInfo } from '$lib/types';
+	import Logo from './Logo.svelte';
 
 	let {
 		onUnlock,
@@ -171,7 +172,7 @@
 <div class="unlock-screen">
 	<div class="unlock-card">
 		<div class="logo">
-			<span class="logo-icon">2</span>
+			<Logo size={48} />
 			<h1>Toofer</h1>
 		</div>
 
@@ -398,19 +399,6 @@
 		justify-content: center;
 		gap: 0.75rem;
 		margin-bottom: 0.5rem;
-	}
-
-	.logo-icon {
-		width: 48px;
-		height: 48px;
-		background: var(--accent);
-		border-radius: 12px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 1.5rem;
-		font-weight: bold;
-		color: white;
 	}
 
 	h1 {

@@ -5,6 +5,7 @@
 	import * as accountStore from '$lib/stores/accounts.svelte';
 	import UnlockScreen from '$lib/components/UnlockScreen.svelte';
 	import OTPList from '$lib/components/OTPList.svelte';
+	import Logo from '$lib/components/Logo.svelte';
 
 	// Derive from store so UI updates when Header locks the app
 	let unlocked = $derived(accountStore.isUnlocked());
@@ -112,7 +113,7 @@
 	<div class="loading-screen">
 		<div class="loading-card">
 			<div class="logo">
-				<span class="logo-icon">2</span>
+				<Logo size={48} />
 				<h1>Toofer</h1>
 			</div>
 			<div class="loading-spinner"></div>
@@ -150,19 +151,6 @@
 		justify-content: center;
 		gap: 0.75rem;
 		margin-bottom: 1.5rem;
-	}
-
-	.logo-icon {
-		width: 48px;
-		height: 48px;
-		background: var(--accent);
-		border-radius: 12px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 1.5rem;
-		font-weight: bold;
-		color: white;
 	}
 
 	h1 {

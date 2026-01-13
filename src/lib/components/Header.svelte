@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import ThemeToggle from './ThemeToggle.svelte';
+	import Logo from './Logo.svelte';
 	import * as accountStore from '$lib/stores/accounts.svelte';
 
 	let unlocked = $derived(accountStore.isUnlocked());
@@ -15,7 +16,7 @@
 	<header>
 		<div class="header-content">
 			<a href="/" class="logo">
-				<span class="logo-icon">2</span>
+				<Logo size={32} />
 				<h1>Toofer</h1>
 			</a>
 			<div class="header-actions">
@@ -83,19 +84,6 @@
 		gap: 0.5rem;
 		text-decoration: none;
 		margin-right: auto;
-	}
-
-	.logo-icon {
-		width: 32px;
-		height: 32px;
-		background: var(--accent);
-		border-radius: 8px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 1rem;
-		font-weight: bold;
-		color: white;
 	}
 
 	h1 {
