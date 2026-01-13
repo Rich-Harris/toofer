@@ -39,8 +39,12 @@
 		--text-primary: #ffffff;
 		--text-secondary: #a0a0a0;
 		--text-muted: #666666;
-		--accent: #6366f1;
+		--accent: hsl(37, 96%, 61%);
+		--accent-secondary: hsl(239, 52%, 45%);
 		--error: #ef4444;
+		--radius-sm: 0.375rem;
+		--radius-md: 0.5rem;
+		--radius-lg: 0.75rem;
 
 		background: var(--bg);
 		color: var(--text-primary);
@@ -55,7 +59,8 @@
 		--text-primary: #171717;
 		--text-secondary: #525252;
 		--text-muted: #a3a3a3;
-		--accent: #6366f1;
+		--accent: hsl(37, 90%, 50%);
+		--accent-secondary: hsl(239, 52%, 37%);
 		--error: #dc2626;
 	}
 </style>

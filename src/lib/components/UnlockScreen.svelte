@@ -386,11 +386,12 @@
 
 	.unlock-card {
 		background: var(--card-bg);
-		border-radius: 1rem;
+		border-radius: var(--radius-lg);
+		corner-shape: squircle;
 		padding: 2rem;
 		width: 100%;
 		max-width: 400px;
-		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
 
 	.logo {
@@ -438,6 +439,7 @@
 		justify-content: center;
 		gap: 0.75rem;
 		padding: 1rem;
+		margin-top: 1.25rem;
 		background: var(--accent);
 		color: white;
 		border: none;
@@ -481,6 +483,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
+		margin-top: 0.5rem;
 	}
 
 	.input-group {
@@ -601,6 +604,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
+		margin-top: 1.25rem;
 	}
 
 	.biometric-btn-placeholder {

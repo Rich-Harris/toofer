@@ -99,7 +99,8 @@
 		gap: 0.75rem;
 		padding: 1rem 1.25rem;
 		background: var(--card-bg);
-		border-radius: 0.75rem;
+		border-radius: var(--radius-lg);
+		corner-shape: squircle;
 		cursor: pointer;
 		transition: transform 0.15s, box-shadow 0.15s;
 		position: relative;
@@ -128,7 +129,8 @@
 		width: 40px;
 		height: 40px;
 		background: var(--accent);
-		border-radius: 10px;
+		border-radius: var(--radius-md);
+		corner-shape: squircle;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -174,10 +176,6 @@
 		flex-shrink: 0;
 	}
 
-	.otp.expiring {
-		color: var(--error);
-	}
-
 	.settings-link {
 		display: flex;
 		align-items: center;
@@ -206,18 +204,14 @@
 		right: 0;
 		height: 3px;
 		background: var(--border);
-		border-radius: 0 0 0.75rem 0.75rem;
+		border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 		overflow: hidden;
 	}
 
 	.timer-bar-progress {
 		height: 100%;
 		background: var(--accent);
-		border-radius: 0 0 0 0.75rem;
-	}
-
-	.timer-bar.expiring .timer-bar-progress {
-		background: var(--error);
+		border-radius: 0 0 0 var(--radius-lg);
 	}
 
 	.copied-toast {

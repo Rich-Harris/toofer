@@ -558,10 +558,6 @@
 		transition: color 0.3s;
 	}
 
-	.otp-value.expiring {
-		color: var(--error);
-	}
-
 	.timer-bar {
 		position: absolute;
 		bottom: 0;
@@ -574,10 +570,6 @@
 	.timer-bar-progress {
 		height: 100%;
 		background: var(--accent);
-	}
-
-	.timer-bar.expiring .timer-bar-progress {
-		background: var(--error);
 	}
 
 	.qr-card {
