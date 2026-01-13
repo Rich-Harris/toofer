@@ -25,7 +25,8 @@
 	let progress = $state(1);
 	let lastTimeStep = $state(-1);
 	let showDeleteConfirm = $state(false);
-	let editing = $state(false);
+	let editingIssuer = $state(false);
+	let editingName = $state(false);
 	let editIssuer = $state('');
 	let editName = $state('');
 	let qrCodeDataUrl = $state('');
@@ -165,21 +166,50 @@
 		}
 	}
 
-	async function handleSave() {
-		if (account && (editIssuer !== account.issuer || editName !== account.name)) {
-			updateAccount(account.id, { issuer: editIssuer, name: editName });
+	async function saveIssuer() {
+		if (account && editIssuer.trim() && editIssuer !== account.issuer) {
+			updateAccount(account.id, { issuer: editIssuer.trim() });
 			await saveVault(getCurrentVaultId(), getAccounts(), getPassphrase());
 			account = getAccountById(account.id);
 		}
-		editing = false;
+		editingIssuer = false;
 	}
 
-	function handleCancel() {
-		if (account) {
-			editIssuer = account.issuer;
-			editName = account.name;
+	async function saveName() {
+		if (account && editName.trim() && editName !== account.name) {
+			updateAccount(account.id, { name: editName.trim() });
+			await saveVault(getCurrentVaultId(), getAccounts(), getPassphrase());
+			account = getAccountById(account.id);
 		}
-		editing = false;
+		editingName = false;
+	}
+
+	function cancelIssuerEdit() {
+		if (account) editIssuer = account.issuer;
+		editingIssuer = false;
+	}
+
+	function cancelNameEdit() {
+		if (account) editName = account.name;
+		editingName = false;
+	}
+
+	function handleIssuerKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			saveIssuer();
+		} else if (e.key === 'Escape') {
+			cancelIssuerEdit();
+		}
+	}
+
+	function handleNameKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			saveName();
+		} else if (e.key === 'Escape') {
+			cancelNameEdit();
+		}
 	}
 
 	function formatOTP(code: string): string {
@@ -193,57 +223,70 @@
 
 <div class="account-detail">
 	{#if account}
+		<header class="account-header">
+			<div class="issuer-icon">
+				{account.issuer.charAt(0)}
+			</div>
+			<div class="account-info">
+				<div class="info-row">
+					{#if editingIssuer}
+						<input
+							type="text"
+							class="edit-input issuer-input"
+							bind:value={editIssuer}
+							onkeydown={handleIssuerKeydown}
+							onblur={saveIssuer}
+						/>
+					{:else}
+						<h1 class="issuer-name">{account.issuer}</h1>
+						<button
+							type="button"
+							class="edit-icon-btn"
+							onclick={() => (editingIssuer = true)}
+							aria-label="Edit service name"
+						>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+								<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+							</svg>
+						</button>
+					{/if}
+				</div>
+				<div class="info-row">
+					{#if editingName}
+						<input
+							type="text"
+							class="edit-input name-input"
+							bind:value={editName}
+							onkeydown={handleNameKeydown}
+							onblur={saveName}
+						/>
+					{:else}
+						<span class="account-name">{account.name}</span>
+						<button
+							type="button"
+							class="edit-icon-btn"
+							onclick={() => (editingName = true)}
+							aria-label="Edit account name"
+						>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+								<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+							</svg>
+						</button>
+					{/if}
+				</div>
+			</div>
+		</header>
+
 		<main>
 			<div class="otp-display">
-				<div class="issuer-icon">
-					{account.issuer.charAt(0)}
-				</div>
 				<div class="otp-value" class:expiring={timeRemaining <= 5}>
 					{formatOTP(otp)}
 				</div>
 				<div class="timer-bar" class:expiring={timeRemaining <= 5}>
 					<div class="timer-bar-progress" style="width: {progress * 100}%"></div>
 				</div>
-			</div>
-
-			<div class="details-card">
-				{#if editing}
-					<div class="field">
-						<label for="issuer">Service Name</label>
-						<input id="issuer" type="text" bind:value={editIssuer} />
-					</div>
-					<div class="field">
-						<label for="name">Account Name</label>
-						<input id="name" type="text" bind:value={editName} />
-					</div>
-					<div class="edit-actions">
-						<button type="button" class="cancel-btn" onclick={handleCancel}>Cancel</button>
-						<button type="button" class="save-btn" onclick={handleSave}>Save</button>
-					</div>
-				{:else}
-					<div class="field">
-						<label>Service Name</label>
-						<span class="value">{account.issuer}</span>
-					</div>
-					<div class="field">
-						<label>Account Name</label>
-						<span class="value">{account.name}</span>
-					</div>
-					<button type="button" class="edit-btn" onclick={() => (editing = true)}>
-						<svg
-							width="16"
-							height="16"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-						>
-							<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-							<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-						</svg>
-						Edit
-					</button>
-				{/if}
 			</div>
 
 			<div class="qr-card">
@@ -372,9 +415,121 @@
 		flex-direction: column;
 	}
 
+	.account-header {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 1.5rem 1rem;
+		max-width: 600px;
+		margin: 0 auto;
+		width: 100%;
+	}
+
+	.issuer-icon {
+		width: 56px;
+		height: 56px;
+		background: var(--accent);
+		border-radius: 14px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 600;
+		color: white;
+		font-size: 1.5rem;
+		flex-shrink: 0;
+	}
+
+	.account-info {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.info-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.issuer-name {
+		margin: 0;
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.account-name {
+		font-size: 0.9375rem;
+		color: var(--text-secondary);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.edit-icon-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		padding: 0;
+		background: transparent;
+		border: none;
+		border-radius: 6px;
+		color: var(--text-muted);
+		cursor: pointer;
+		opacity: 0;
+		transition: opacity 0.15s, background-color 0.15s, color 0.15s;
+		flex-shrink: 0;
+	}
+
+	.info-row:hover .edit-icon-btn {
+		opacity: 1;
+	}
+
+	.edit-icon-btn:hover {
+		background: var(--border);
+		color: var(--text-primary);
+	}
+
+	.edit-icon-btn:focus-visible {
+		opacity: 1;
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+
+	.edit-input {
+		flex: 1;
+		min-width: 0;
+		padding: 0.375rem 0.625rem;
+		border: 1px solid var(--accent);
+		border-radius: 6px;
+		background: var(--input-bg);
+		color: var(--text-primary);
+		font-family: inherit;
+	}
+
+	.edit-input:focus {
+		outline: none;
+	}
+
+	.issuer-input {
+		font-size: 1.25rem;
+		font-weight: 600;
+	}
+
+	.name-input {
+		font-size: 0.9375rem;
+	}
+
 	main {
 		flex: 1;
-		padding: 1.5rem 1rem;
+		padding: 0 1rem 1.5rem;
 		max-width: 600px;
 		margin: 0 auto;
 		width: 100%;
@@ -391,20 +546,6 @@
 		text-align: center;
 		position: relative;
 		overflow: hidden;
-	}
-
-	.issuer-icon {
-		width: 64px;
-		height: 64px;
-		background: var(--accent);
-		border-radius: 16px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: 600;
-		color: white;
-		font-size: 1.75rem;
-		margin: 0 auto 1.5rem;
 	}
 
 	.otp-value {
@@ -437,111 +578,6 @@
 
 	.timer-bar.expiring .timer-bar-progress {
 		background: var(--error);
-	}
-
-	.details-card {
-		background: var(--card-bg);
-		border: 1px solid var(--border);
-		border-radius: 1rem;
-		padding: 1.5rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.field {
-		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
-	}
-
-	.field label {
-		font-size: 0.8125rem;
-		color: var(--text-secondary);
-	}
-
-	.field .value {
-		font-size: 1rem;
-		color: var(--text-primary);
-	}
-
-	.field input {
-		padding: 0.75rem 1rem;
-		border: 1px solid var(--border);
-		border-radius: 0.5rem;
-		background: var(--input-bg);
-		color: var(--text-primary);
-		font-size: 1rem;
-	}
-
-	.field input:focus {
-		outline: none;
-		border-color: var(--accent);
-	}
-
-	.edit-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		padding: 0.75rem 1rem;
-		background: transparent;
-		border: 1px solid var(--border);
-		border-radius: 0.5rem;
-		color: var(--text-secondary);
-		font-size: 0.875rem;
-		cursor: pointer;
-		transition:
-			background-color 0.2s,
-			color 0.2s;
-		margin-top: 0.5rem;
-	}
-
-	.edit-btn:hover {
-		background: var(--border);
-		color: var(--text-primary);
-	}
-
-	.edit-actions {
-		display: flex;
-		gap: 0.75rem;
-		margin-top: 0.5rem;
-	}
-
-	.cancel-btn {
-		flex: 1;
-		padding: 0.75rem 1rem;
-		background: transparent;
-		border: 1px solid var(--border);
-		border-radius: 0.5rem;
-		color: var(--text-secondary);
-		font-size: 0.875rem;
-		cursor: pointer;
-		transition:
-			background-color 0.2s,
-			color 0.2s;
-	}
-
-	.cancel-btn:hover {
-		background: var(--border);
-		color: var(--text-primary);
-	}
-
-	.save-btn {
-		flex: 1;
-		padding: 0.75rem 1rem;
-		background: var(--accent);
-		border: none;
-		border-radius: 0.5rem;
-		color: white;
-		font-size: 0.875rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: opacity 0.2s;
-	}
-
-	.save-btn:hover {
-		opacity: 0.9;
 	}
 
 	.qr-card {
@@ -726,6 +762,42 @@
 		font-size: 0.875rem;
 	}
 
+	.cancel-btn {
+		flex: 1;
+		padding: 0.75rem 1rem;
+		background: transparent;
+		border: 1px solid var(--border);
+		border-radius: 0.5rem;
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition:
+			background-color 0.2s,
+			color 0.2s;
+	}
+
+	.cancel-btn:hover {
+		background: var(--border);
+		color: var(--text-primary);
+	}
+
+	.save-btn {
+		flex: 1;
+		padding: 0.75rem 1rem;
+		background: var(--accent);
+		border: none;
+		border-radius: 0.5rem;
+		color: white;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: opacity 0.2s;
+	}
+
+	.save-btn:hover {
+		opacity: 0.9;
+	}
+
 	.danger-zone {
 		background: var(--card-bg);
 		border: 1px solid var(--error);
@@ -779,7 +851,6 @@
 	}
 
 	/* Focus visible */
-	.edit-btn:focus-visible,
 	.cancel-btn:focus-visible,
 	.save-btn:focus-visible,
 	.delete-btn:focus-visible,
@@ -791,7 +862,7 @@
 		outline-offset: 2px;
 	}
 
-	.field input:focus-visible,
+	.edit-input:focus-visible,
 	.export-auth-form input:focus-visible {
 		outline: 2px solid var(--accent);
 		outline-offset: 2px;
@@ -799,7 +870,7 @@
 
 	/* Reduced motion */
 	@media (prefers-reduced-motion: reduce) {
-		.edit-btn,
+		.edit-icon-btn,
 		.cancel-btn,
 		.save-btn,
 		.delete-btn,
