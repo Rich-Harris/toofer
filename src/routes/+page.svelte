@@ -7,12 +7,12 @@
 	import UnlockScreen from '$lib/components/UnlockScreen.svelte';
 	import OTPList from '$lib/components/OTPList.svelte';
 
-	// Initialize from store in case we're navigating back while already unlocked
-	let unlocked = $state(accountStore.isUnlocked());
-	let accounts = $state<Account[]>(accountStore.getAccounts());
+	// Derive from store so UI updates when Header locks the app
+	let unlocked = $derived(accountStore.isUnlocked());
+	let accounts = $derived(accountStore.getAccounts());
+	let currentPassphrase = $derived(accountStore.getPassphrase());
 	// Initialize as null to indicate "checking" state, preventing layout shift
 	let isNewVault = $state<boolean | null>(null);
-	let currentPassphrase = $state(accountStore.getPassphrase());
 
 	$effect(() => {
 		if (browser) {
@@ -21,27 +21,17 @@
 	});
 
 	async function handleUnlock(passphrase: string) {
+		let loadedAccounts: Account[];
 		if (isNewVault) {
-			accounts = sampleAccounts;
-			await saveVault(accounts, passphrase);
-			currentPassphrase = passphrase;
-			unlocked = true;
+			loadedAccounts = sampleAccounts;
+			await saveVault(loadedAccounts, passphrase);
 		} else {
-			accounts = await loadVault(passphrase);
-			currentPassphrase = passphrase;
-			unlocked = true;
+			loadedAccounts = await loadVault(passphrase);
 		}
-		// Sync to store for other routes
-		accountStore.setAccounts(accounts);
+		// Update store - derived values will automatically update
+		accountStore.setAccounts(loadedAccounts);
 		accountStore.setPassphrase(passphrase);
 		accountStore.setUnlocked(true);
-	}
-
-	function handleLock() {
-		unlocked = false;
-		accounts = [];
-		currentPassphrase = '';
-		accountStore.lock();
 	}
 
 	function isDuplicate(account: Account): boolean {
@@ -52,9 +42,9 @@
 		if (isDuplicate(account)) {
 			return { added: false, duplicate: true };
 		}
-		accounts = [...accounts, account];
-		await saveVault(accounts, currentPassphrase);
-		accountStore.setAccounts(accounts);
+		const updated = [...accounts, account];
+		await saveVault(updated, currentPassphrase);
+		accountStore.setAccounts(updated);
 		return { added: true, duplicate: false };
 	}
 
@@ -73,18 +63,17 @@
 		}
 
 		if (uniqueNewAccounts.length > 0) {
-			accounts = [...accounts, ...uniqueNewAccounts];
-			await saveVault(accounts, currentPassphrase);
-			accountStore.setAccounts(accounts);
+			const updated = [...accounts, ...uniqueNewAccounts];
+			await saveVault(updated, currentPassphrase);
+			accountStore.setAccounts(updated);
 		}
 
 		return { added: uniqueNewAccounts.length, duplicates };
 	}
 
 	async function handleReorderAccounts(reordered: Account[]) {
-		accounts = reordered;
-		await saveVault(accounts, currentPassphrase);
-		accountStore.setAccounts(accounts);
+		await saveVault(reordered, currentPassphrase);
+		accountStore.setAccounts(reordered);
 	}
 </script>
 
@@ -96,7 +85,6 @@
 {#if unlocked}
 	<OTPList
 		{accounts}
-		onLock={handleLock}
 		onAddAccount={handleAddAccount}
 		onImportAccounts={handleImportAccounts}
 		onReorderAccounts={handleReorderAccounts}
