@@ -31,6 +31,7 @@
 	let editName = $state('');
 	let qrCodeDataUrl = $state('');
 	let qrCopied = $state(false);
+	let otpCopied = $state(false);
 
 	// Export authentication state
 	let exportUnlocked = $state(false);
@@ -152,6 +153,18 @@
 			qrCopied = true;
 			setTimeout(() => {
 				qrCopied = false;
+			}, 2000);
+		} catch (err) {
+			console.error('Failed to copy:', err);
+		}
+	}
+
+	async function copyOTP() {
+		try {
+			await navigator.clipboard.writeText(otp);
+			otpCopied = true;
+			setTimeout(() => {
+				otpCopied = false;
 			}, 2000);
 		} catch (err) {
 			console.error('Failed to copy:', err);
@@ -280,14 +293,22 @@
 		</header>
 
 		<main>
-			<div class="otp-display">
+			<button
+				type="button"
+				class="otp-display"
+				onclick={copyOTP}
+				aria-label="Copy code to clipboard"
+			>
 				<div class="otp-value" class:expiring={timeRemaining <= 5}>
 					{formatOTP(otp)}
 				</div>
 				<div class="timer-bar" class:expiring={timeRemaining <= 5}>
 					<div class="timer-bar-progress" style="width: {progress * 100}%"></div>
 				</div>
-			</div>
+				{#if otpCopied}
+					<span class="otp-copied-toast" role="status" aria-live="polite">Copied!</span>
+				{/if}
+			</button>
 
 			<div class="qr-card">
 				<h2>Export Account</h2>
@@ -539,6 +560,7 @@
 	}
 
 	.otp-display {
+		width: 100%;
 		background: var(--card-bg);
 		border: 1px solid var(--border);
 		border-radius: 1rem;
@@ -546,6 +568,17 @@
 		text-align: center;
 		position: relative;
 		overflow: hidden;
+		cursor: pointer;
+		transition: transform 0.15s, box-shadow 0.15s;
+	}
+
+	.otp-display:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	}
+
+	.otp-display:active {
+		transform: translateY(0);
 	}
 
 	.otp-value {
@@ -570,6 +603,20 @@
 	.timer-bar-progress {
 		height: 100%;
 		background: var(--accent);
+	}
+
+	.otp-copied-toast {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background: var(--accent);
+		color: white;
+		padding: 0.5rem 1rem;
+		border-radius: 0.5rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		animation: fade-in-out 2s ease-in-out;
 	}
 
 	.qr-card {
@@ -843,6 +890,7 @@
 	}
 
 	/* Focus visible */
+	.otp-display:focus-visible,
 	.cancel-btn:focus-visible,
 	.save-btn:focus-visible,
 	.delete-btn:focus-visible,
@@ -866,7 +914,9 @@
 		.cancel-btn,
 		.save-btn,
 		.delete-btn,
+		.otp-display,
 		.otp-value,
+		.otp-copied-toast,
 		.qr-code,
 		.qr-copied-toast,
 		.biometric-btn,
@@ -876,7 +926,8 @@
 			animation: none;
 		}
 
-		.qr-copied-toast {
+		.qr-copied-toast,
+		.otp-copied-toast {
 			opacity: 1;
 		}
 	}
