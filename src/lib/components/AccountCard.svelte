@@ -69,34 +69,9 @@
 				<span class="name">{account.name}</span>
 			</div>
 		</div>
-		<div class="otp-section">
-			<span class="otp" class:expiring={timeRemaining <= 5}>{formatOTP(otp)}</span>
-			<div class="timer">
-				<svg viewBox="0 0 36 36" class="circular-timer">
-					<circle
-						class="timer-bg"
-						cx="18"
-						cy="18"
-						r="16"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-					></circle>
-					<circle
-						class="timer-progress"
-						cx="18"
-						cy="18"
-						r="16"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-dasharray="100.53"
-						stroke-dashoffset={100.53 * (1 - timeRemaining / 30)}
-						transform="rotate(-90 18 18)"
-					></circle>
-				</svg>
-				<span class="timer-text">{timeRemaining}</span>
-			</div>
+		<span class="otp" class:expiring={timeRemaining <= 5}>{formatOTP(otp)}</span>
+		<div class="timer-bar" class:expiring={timeRemaining <= 5}>
+			<div class="timer-bar-progress" style="width: {(timeRemaining / 30) * 100}%"></div>
 		</div>
 		{#if copied}
 			<span class="copied-toast">Copied!</span>
@@ -148,6 +123,7 @@
 		flex: 1;
 		text-align: left;
 		font-family: inherit;
+		overflow: hidden;
 	}
 
 	.account-card:hover {
@@ -294,14 +270,6 @@
 		text-overflow: ellipsis;
 	}
 
-	.otp-section {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		flex-shrink: 0;
-		margin-left: auto;
-	}
-
 	.otp {
 		font-family: 'SF Mono', 'Fira Code', monospace;
 		font-size: 1.375rem;
@@ -310,42 +278,33 @@
 		color: var(--text-primary);
 		transition: color 0.3s;
 		font-variant-numeric: tabular-nums;
+		flex-shrink: 0;
 	}
 
 	.otp.expiring {
 		color: var(--error);
 	}
 
-	.timer {
-		position: relative;
-		width: 32px;
-		height: 32px;
-	}
-
-	.circular-timer {
-		width: 100%;
-		height: 100%;
-	}
-
-	.timer-bg {
-		color: var(--border);
-	}
-
-	.timer-progress {
-		color: var(--accent);
-		transition: stroke-dashoffset 0.3s linear;
-	}
-
-	.timer-text {
+	.timer-bar {
 		position: absolute;
-		inset: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		color: var(--text-secondary);
-		font-variant-numeric: tabular-nums;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 3px;
+		background: var(--border);
+		border-radius: 0 0 0.75rem 0.75rem;
+		overflow: hidden;
+	}
+
+	.timer-bar-progress {
+		height: 100%;
+		background: var(--accent);
+		transition: width 1s linear;
+		border-radius: 0 0 0 0.75rem;
+	}
+
+	.timer-bar.expiring .timer-bar-progress {
+		background: var(--error);
 	}
 
 	.copied-toast {
@@ -392,7 +351,7 @@
 		.cancel-btn,
 		.confirm-btn,
 		.otp,
-		.timer-progress,
+		.timer-bar-progress,
 		.copied-toast {
 			transition: none;
 		}

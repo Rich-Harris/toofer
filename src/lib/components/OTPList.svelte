@@ -410,19 +410,10 @@
 						ondragend={handleDragEnd}
 						role="listitem"
 					>
-						<div class="drag-handle" aria-label="Drag to reorder">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<line x1="8" y1="6" x2="16" y2="6"></line>
-								<line x1="8" y1="12" x2="16" y2="12"></line>
-								<line x1="8" y1="18" x2="16" y2="18"></line>
-							</svg>
-						</div>
-						<div class="account-item-content">
 							<AccountCard
-								{account}
-								onDelete={() => onDeleteAccount(account.id)}
-							/>
-						</div>
+							{account}
+							onDelete={() => onDeleteAccount(account.id)}
+						/>
 					</div>
 				{/each}
 			</div>
@@ -711,10 +702,12 @@
 
 	.account-item {
 		position: relative;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
+		cursor: grab;
 		transition: opacity 0.2s, transform 0.2s;
+	}
+
+	.account-item:active {
+		cursor: grabbing;
 	}
 
 	.account-item.dragging {
@@ -734,34 +727,6 @@
 		height: 2px;
 		background: var(--accent);
 		border-radius: 1px;
-	}
-
-	.drag-handle {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.5rem 0.25rem;
-		color: var(--text-muted);
-		cursor: grab;
-		opacity: 0;
-		transition: opacity 0.2s, color 0.2s;
-	}
-
-	.account-item:hover .drag-handle {
-		opacity: 1;
-	}
-
-	.drag-handle:hover {
-		color: var(--text-secondary);
-	}
-
-	.drag-handle:active {
-		cursor: grabbing;
-	}
-
-	.account-item-content {
-		flex: 1;
-		min-width: 0;
 	}
 
 	.empty-state {
@@ -855,7 +820,6 @@
 		.export-btn,
 		.add-first-btn,
 		.account-item,
-		.drag-handle,
 		.toast-message {
 			transition: none;
 			animation: none;
