@@ -495,7 +495,7 @@
 		border-radius: 0.5rem;
 		color: var(--text-secondary);
 		cursor: pointer;
-		transition: all 0.2s;
+		transition: background-color 0.2s, color 0.2s;
 	}
 
 	.settings-btn:hover {
@@ -514,7 +514,7 @@
 		color: var(--text-secondary);
 		cursor: pointer;
 		font-size: 0.875rem;
-		transition: all 0.2s;
+		transition: background-color 0.2s, color 0.2s;
 	}
 
 	.lock-btn:hover {
@@ -661,7 +661,7 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		cursor: pointer;
-		transition: all 0.2s;
+		transition: background-color 0.2s, color 0.2s;
 	}
 
 	.export-btn:hover {
@@ -782,5 +782,33 @@
 
 	.add-first-btn:hover {
 		opacity: 0.9;
+	}
+
+	/* Focus visible for all buttons */
+	.add-btn:focus-visible,
+	.settings-btn:focus-visible,
+	.lock-btn:focus-visible,
+	.toggle-btn:focus-visible,
+	.import-btn:focus-visible,
+	.export-btn:focus-visible,
+	.add-first-btn:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+
+	/* Reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		.add-btn,
+		.settings-btn,
+		.lock-btn,
+		.toggle-btn,
+		.toggle-slider,
+		.import-btn,
+		.export-btn,
+		.add-first-btn,
+		.account-item,
+		.drag-handle {
+			transition: none;
+		}
 	}
 </style>

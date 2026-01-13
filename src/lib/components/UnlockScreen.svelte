@@ -14,16 +14,19 @@
 	let confirmPassphrase = $state('');
 	let error = $state('');
 	let loading = $state(false);
-	let biometricAvailable = $state(false);
-	let hasBiometric = $state(false);
+	// Initialize to null to indicate "checking" state, preventing layout shift
+	// Both are null during SSR and initial render to avoid hydration mismatch
+	let biometricAvailable = $state<boolean | null>(null);
+	let hasBiometric = $state<boolean | null>(null);
 
 	$effect(() => {
 		checkBiometricAvailability();
 	});
 
 	async function checkBiometricAvailability() {
-		biometricAvailable = await isPlatformAuthenticatorAvailable();
+		// Check localStorage first (synchronous) to minimize flash
 		hasBiometric = hasBiometricCredential();
+		biometricAvailable = await isPlatformAuthenticatorAvailable();
 	}
 
 	async function handleSubmit(e: Event) {
@@ -85,35 +88,44 @@
 			{/if}
 		</p>
 
-		{#if !isNewVault && biometricAvailable && hasBiometric}
-			<button
-				type="button"
-				class="biometric-btn"
-				onclick={handleBiometricUnlock}
-				disabled={loading}
-			>
-				<svg
-					width="24"
-					height="24"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
+		{#if !isNewVault && hasBiometric !== false}
+			{#if hasBiometric === null || biometricAvailable === null}
+				<!-- Reserve space while checking biometric availability -->
+				<div class="biometric-placeholder" aria-hidden="true">
+					<div class="biometric-btn-placeholder"></div>
+					<div class="divider-placeholder"></div>
+				</div>
+			{:else if biometricAvailable && hasBiometric}
+				<button
+					type="button"
+					class="biometric-btn"
+					onclick={handleBiometricUnlock}
+					disabled={loading}
 				>
-					<path
-						d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"
-					></path>
-				</svg>
-				{#if loading}
-					Authenticating...
-				{:else}
-					Unlock with Biometrics
-				{/if}
-			</button>
+					<svg
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						aria-hidden="true"
+					>
+						<path
+							d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"
+						></path>
+					</svg>
+					{#if loading}
+						Authenticating…
+					{:else}
+						Unlock with Biometrics
+					{/if}
+				</button>
 
-			<div class="divider">
-				<span>or use passphrase</span>
-			</div>
+				<div class="divider">
+					<span>or use passphrase</span>
+				</div>
+			{/if}
 		{/if}
 
 		<form onsubmit={handleSubmit}>
@@ -289,6 +301,11 @@
 		border-color: var(--accent);
 	}
 
+	input:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+
 	input::placeholder {
 		color: var(--text-muted);
 	}
@@ -320,5 +337,38 @@
 	.submit-btn:disabled {
 		opacity: 0.6;
 		cursor: not-allowed;
+	}
+
+	.biometric-placeholder {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.biometric-btn-placeholder {
+		height: 56px;
+		background: var(--border);
+		border-radius: 0.5rem;
+		opacity: 0.3;
+	}
+
+	.divider-placeholder {
+		height: 24px;
+	}
+
+	/* Focus visible for buttons */
+	.biometric-btn:focus-visible,
+	.submit-btn:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+
+	/* Reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		input,
+		.biometric-btn,
+		.submit-btn {
+			transition: none;
+		}
 	}
 </style>

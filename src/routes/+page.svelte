@@ -8,7 +8,8 @@
 
 	let unlocked = $state(false);
 	let accounts = $state<Account[]>([]);
-	let isNewVault = $state(false);
+	// Initialize as null to indicate "checking" state, preventing layout shift
+	let isNewVault = $state<boolean | null>(null);
 	let currentPassphrase = $state('');
 
 	$effect(() => {
@@ -78,6 +79,88 @@
 		onReorderAccounts={handleReorderAccounts}
 		passphrase={currentPassphrase}
 	/>
+{:else if isNewVault === null}
+	<!-- Loading state while checking vault status -->
+	<div class="loading-screen">
+		<div class="loading-card">
+			<div class="logo">
+				<span class="logo-icon">2</span>
+				<h1>Toofer</h1>
+			</div>
+			<div class="loading-spinner"></div>
+		</div>
+	</div>
 {:else}
-	<UnlockScreen onUnlock={handleUnlock} {isNewVault} />
+	<UnlockScreen onUnlock={handleUnlock} isNewVault={isNewVault ?? false} />
 {/if}
+
+<style>
+	.loading-screen {
+		min-height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+	}
+
+	.loading-card {
+		background: var(--card-bg);
+		border-radius: 1rem;
+		padding: 2rem;
+		width: 100%;
+		max-width: 400px;
+		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+		text-align: center;
+	}
+
+	.logo {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.logo-icon {
+		width: 48px;
+		height: 48px;
+		background: var(--accent);
+		border-radius: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.5rem;
+		font-weight: bold;
+		color: white;
+	}
+
+	h1 {
+		margin: 0;
+		font-size: 2rem;
+		color: var(--text-primary);
+	}
+
+	.loading-spinner {
+		width: 32px;
+		height: 32px;
+		margin: 0 auto;
+		border: 3px solid var(--border);
+		border-top-color: var(--accent);
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.loading-spinner {
+			animation: none;
+			border-top-color: var(--border);
+			opacity: 0.6;
+		}
+	}
+</style>

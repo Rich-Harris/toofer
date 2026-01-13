@@ -7,10 +7,12 @@
 	let { onScan, onClose }: { onScan: (account: Account) => void; onClose: () => void } = $props();
 
 	let scannerRef: HTMLDivElement | undefined = $state();
+	let modalRef: HTMLDivElement | undefined = $state();
 	let html5Qrcode: Html5Qrcode | null = null;
 	let error = $state('');
 	let scanning = $state(false);
 	let manualEntry = $state(false);
+	let submitting = $state(false);
 
 	// Manual entry fields
 	let manualIssuer = $state('');
@@ -23,6 +25,48 @@
 		}
 		return () => {
 			stopScanner();
+		};
+	});
+
+	// Focus trap and keyboard handling for modal
+	$effect(() => {
+		if (!modalRef) return;
+
+		const focusableSelector =
+			'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+		const previouslyFocused = document.activeElement as HTMLElement;
+
+		// Focus first focusable element
+		const firstFocusable = modalRef.querySelector<HTMLElement>(focusableSelector);
+		firstFocusable?.focus();
+
+		function handleKeyDown(e: KeyboardEvent) {
+			if (e.key === 'Escape') {
+				e.preventDefault();
+				onClose();
+				return;
+			}
+
+			if (e.key !== 'Tab' || !modalRef) return;
+
+			const focusables = modalRef.querySelectorAll<HTMLElement>(focusableSelector);
+			const first = focusables[0];
+			const last = focusables[focusables.length - 1];
+
+			if (e.shiftKey && document.activeElement === first) {
+				e.preventDefault();
+				last?.focus();
+			} else if (!e.shiftKey && document.activeElement === last) {
+				e.preventDefault();
+				first?.focus();
+			}
+		}
+
+		document.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
+			previouslyFocused?.focus();
 		};
 	});
 
@@ -79,7 +123,7 @@
 		}
 	}
 
-	function handleManualSubmit(e: Event) {
+	async function handleManualSubmit(e: Event) {
 		e.preventDefault();
 		error = '';
 
@@ -105,6 +149,8 @@
 			return;
 		}
 
+		submitting = true;
+
 		const account: Account = {
 			id: crypto.randomUUID(),
 			name: manualName.trim(),
@@ -126,10 +172,10 @@
 	}
 </script>
 
-<div class="scanner-overlay">
-	<div class="scanner-modal">
+<div class="scanner-overlay" onclick={(e) => e.target === e.currentTarget && onClose()}>
+	<div class="scanner-modal" bind:this={modalRef} role="dialog" aria-modal="true" aria-labelledby="scanner-title">
 		<header>
-			<h2>Add Account</h2>
+			<h2 id="scanner-title">Add Account</h2>
 			<button type="button" class="close-btn" onclick={onClose} aria-label="Close">
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<path d="M18 6L6 18M6 6l12 12"></path>
@@ -178,7 +224,13 @@
 						<p class="error">{error}</p>
 					{/if}
 
-					<button type="submit" class="submit-btn">Add Account</button>
+					<button type="submit" class="submit-btn" disabled={submitting}>
+						{#if submitting}
+							Adding…
+						{:else}
+							Add Account
+						{/if}
+					</button>
 				</form>
 			{:else}
 				<p class="instructions">Scan the QR code from your authenticator setup page</p>
@@ -227,6 +279,7 @@
 		justify-content: center;
 		padding: 1rem;
 		z-index: 100;
+		overscroll-behavior: contain;
 	}
 
 	.scanner-modal {
@@ -236,6 +289,7 @@
 		max-width: 400px;
 		max-height: 90vh;
 		overflow: auto;
+		overscroll-behavior: contain;
 	}
 
 	header {
@@ -351,6 +405,11 @@
 		border-color: var(--accent);
 	}
 
+	input:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+
 	input::placeholder {
 		color: var(--text-muted);
 	}
@@ -399,5 +458,28 @@
 	.toggle-btn:hover {
 		background: var(--bg);
 		color: var(--text-primary);
+	}
+
+	/* Focus visible for buttons */
+	.close-btn:focus-visible,
+	.submit-btn:focus-visible,
+	.toggle-btn:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+
+	.submit-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	/* Reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		.close-btn,
+		input,
+		.submit-btn,
+		.toggle-btn {
+			transition: none;
+		}
 	}
 </style>

@@ -232,17 +232,23 @@
 		align-items: center;
 		justify-content: center;
 		padding: 0.5rem;
+		min-width: 36px;
+		min-height: 36px;
 		background: transparent;
 		border: 1px solid var(--border);
 		border-radius: 0.5rem;
 		color: var(--text-secondary);
 		cursor: pointer;
-		transition: all 0.2s;
+		transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
 		opacity: 0;
 	}
 
 	.account-card-wrapper:hover .edit-btn,
-	.account-card-wrapper:hover .delete-btn {
+	.account-card-wrapper:hover .delete-btn,
+	.account-card-wrapper:focus-within .edit-btn,
+	.account-card-wrapper:focus-within .delete-btn,
+	.edit-btn:focus-visible,
+	.delete-btn:focus-visible {
 		opacity: 1;
 	}
 
@@ -256,6 +262,12 @@
 		background: var(--error);
 		border-color: var(--error);
 		color: white;
+	}
+
+	.edit-btn:focus-visible,
+	.delete-btn:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
 	}
 
 	.edit-overlay {
@@ -305,6 +317,11 @@
 	.edit-field input:focus {
 		outline: none;
 		border-color: var(--accent);
+	}
+
+	.edit-field input:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
 	}
 
 	.edit-actions {
@@ -359,7 +376,7 @@
 		color: var(--text-secondary);
 		font-size: 0.875rem;
 		cursor: pointer;
-		transition: all 0.2s;
+		transition: background-color 0.2s, color 0.2s;
 	}
 
 	.cancel-btn:hover {
@@ -432,6 +449,7 @@
 		letter-spacing: 0.05em;
 		color: var(--text-primary);
 		transition: color 0.3s;
+		font-variant-numeric: tabular-nums;
 	}
 
 	.otp.expiring {
@@ -467,6 +485,7 @@
 		font-size: 0.6875rem;
 		font-weight: 600;
 		color: var(--text-secondary);
+		font-variant-numeric: tabular-nums;
 	}
 
 	.copied-toast {
@@ -490,6 +509,41 @@
 		}
 		10%,
 		90% {
+			opacity: 1;
+		}
+	}
+
+	/* Focus visible for main card button */
+	.account-card:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+
+	.save-btn:focus-visible,
+	.cancel-btn:focus-visible,
+	.confirm-btn:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+
+	/* Reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		.account-card,
+		.edit-btn,
+		.delete-btn,
+		.cancel-btn,
+		.save-btn,
+		.confirm-btn,
+		.edit-field input,
+		.otp,
+		.timer-progress,
+		.toggle-slider,
+		.copied-toast {
+			transition: none;
+		}
+
+		.copied-toast {
+			animation: none;
 			opacity: 1;
 		}
 	}
