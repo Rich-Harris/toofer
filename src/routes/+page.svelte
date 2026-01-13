@@ -137,11 +137,12 @@
 
 	.loading-card {
 		background: var(--card-bg);
-		border-radius: 1rem;
+		border-radius: var(--radius-lg);
+		corner-shape: squircle;
 		padding: 2rem;
 		width: 100%;
 		max-width: 400px;
-		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 		text-align: center;
 	}
 
