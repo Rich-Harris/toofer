@@ -21,12 +21,14 @@
 	}: {
 		accounts: Account[];
 		onLock: () => void;
-		onAddAccount: (account: Account) => void;
-		onImportAccounts: (accounts: Account[]) => void;
+		onAddAccount: (account: Account) => Promise<{ added: boolean; duplicate: boolean }>;
+		onImportAccounts: (accounts: Account[]) => Promise<{ added: number; duplicates: number }>;
 		onDeleteAccount: (id: string) => void;
 		onReorderAccounts: (accounts: Account[]) => void;
 		passphrase: string;
 	} = $props();
+
+	let scannerMessage = $state('');
 
 	let biometricAvailable = $state(false);
 	let biometricEnabled = $state(false);
@@ -69,9 +71,15 @@
 		}
 	}
 
-	function handleScan(account: Account) {
+	async function handleScan(account: Account) {
 		showScanner = false;
-		onAddAccount(account);
+		const result = await onAddAccount(account);
+		if (result.duplicate) {
+			scannerMessage = 'Account already exists';
+			setTimeout(() => {
+				scannerMessage = '';
+			}, 3000);
+		}
 	}
 
 	function triggerImport() {
@@ -106,8 +114,18 @@
 			}
 
 			if (importedAccounts.length > 0) {
-				onImportAccounts(importedAccounts);
-				settingsMessage = `Imported ${importedAccounts.length} account${importedAccounts.length === 1 ? '' : 's'}${failedCount > 0 ? ` (${failedCount} failed)` : ''}`;
+				const result = await onImportAccounts(importedAccounts);
+				const parts: string[] = [];
+				if (result.added > 0) {
+					parts.push(`Imported ${result.added} account${result.added === 1 ? '' : 's'}`);
+				}
+				if (result.duplicates > 0) {
+					parts.push(`${result.duplicates} duplicate${result.duplicates === 1 ? '' : 's'} skipped`);
+				}
+				if (failedCount > 0) {
+					parts.push(`${failedCount} failed`);
+				}
+				settingsMessage = parts.length > 0 ? parts.join(', ') : 'No new accounts added';
 			} else {
 				settingsMessage = 'No valid accounts found in file';
 			}
@@ -336,6 +354,10 @@
 				{/if}
 			</div>
 		</div>
+	{/if}
+
+	{#if scannerMessage}
+		<div class="toast-message">{scannerMessage}</div>
 	{/if}
 
 	<main>
@@ -793,6 +815,33 @@
 		outline-offset: 2px;
 	}
 
+	.toast-message {
+		position: fixed;
+		bottom: 2rem;
+		left: 50%;
+		transform: translateX(-50%);
+		background: var(--card-bg);
+		border: 1px solid var(--border);
+		padding: 0.75rem 1.25rem;
+		border-radius: 0.5rem;
+		font-size: 0.875rem;
+		color: var(--text-primary);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		z-index: 50;
+		animation: slide-up 0.2s ease-out;
+	}
+
+	@keyframes slide-up {
+		from {
+			opacity: 0;
+			transform: translateX(-50%) translateY(1rem);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(-50%) translateY(0);
+		}
+	}
+
 	/* Reduced motion */
 	@media (prefers-reduced-motion: reduce) {
 		.add-btn,
@@ -804,8 +853,10 @@
 		.export-btn,
 		.add-first-btn,
 		.account-item,
-		.drag-handle {
+		.drag-handle,
+		.toast-message {
 			transition: none;
+			animation: none;
 		}
 	}
 </style>

@@ -37,14 +37,39 @@
 		currentPassphrase = '';
 	}
 
-	async function handleAddAccount(account: Account) {
-		accounts = [...accounts, account];
-		await saveVault(accounts, currentPassphrase);
+	function isDuplicate(account: Account): boolean {
+		return accounts.some((a) => a.secret === account.secret);
 	}
 
-	async function handleImportAccounts(newAccounts: Account[]) {
-		accounts = [...accounts, ...newAccounts];
+	async function handleAddAccount(account: Account): Promise<{ added: boolean; duplicate: boolean }> {
+		if (isDuplicate(account)) {
+			return { added: false, duplicate: true };
+		}
+		accounts = [...accounts, account];
 		await saveVault(accounts, currentPassphrase);
+		return { added: true, duplicate: false };
+	}
+
+	async function handleImportAccounts(newAccounts: Account[]): Promise<{ added: number; duplicates: number }> {
+		const existingSecrets = new Set(accounts.map((a) => a.secret));
+		const uniqueNewAccounts: Account[] = [];
+		let duplicates = 0;
+
+		for (const account of newAccounts) {
+			if (existingSecrets.has(account.secret)) {
+				duplicates++;
+			} else {
+				existingSecrets.add(account.secret); // Prevent duplicates within the import batch
+				uniqueNewAccounts.push(account);
+			}
+		}
+
+		if (uniqueNewAccounts.length > 0) {
+			accounts = [...accounts, ...uniqueNewAccounts];
+			await saveVault(accounts, currentPassphrase);
+		}
+
+		return { added: uniqueNewAccounts.length, duplicates };
 	}
 
 	async function handleDeleteAccount(id: string) {
