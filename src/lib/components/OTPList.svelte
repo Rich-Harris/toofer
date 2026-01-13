@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import type { Account } from '$lib/types';
 	import AccountCard from './AccountCard.svelte';
 	import QRScanner from './QRScanner.svelte';
@@ -16,16 +17,20 @@
 		onAddAccount,
 		onImportAccounts,
 		onReorderAccounts,
-		passphrase
+		onDeleteVault,
+		onRenameVault,
+		passphrase,
+		vaultName
 	}: {
 		accounts: Account[];
-		onAddAccount: (account: Account) => Promise<{ added: boolean; duplicate: boolean }>;
+		onAddAccount: (account: Account) => Promise<{ added: boolean; duplicate: boolean; id: string }>;
 		onImportAccounts: (accounts: Account[]) => Promise<{ added: number; duplicates: number }>;
 		onReorderAccounts: (accounts: Account[]) => void;
+		onDeleteVault: () => void;
+		onRenameVault: (newName: string) => void;
 		passphrase: string;
+		vaultName: string;
 	} = $props();
-
-	let scannerMessage = $state('');
 
 	let biometricAvailable = $state(false);
 	let biometricEnabled = $state(false);
@@ -37,6 +42,9 @@
 	let importLoading = $state(false);
 	let draggedIndex = $state<number | null>(null);
 	let dragOverIndex = $state<number | null>(null);
+	let showDeleteVaultConfirm = $state(false);
+	let isEditingVaultName = $state(false);
+	let editedVaultName = $state('');
 
 	$effect(() => {
 		checkBiometricStatus();
@@ -71,12 +79,7 @@
 	async function handleScan(account: Account) {
 		showScanner = false;
 		const result = await onAddAccount(account);
-		if (result.duplicate) {
-			scannerMessage = 'Account already exists';
-			setTimeout(() => {
-				scannerMessage = '';
-			}, 3000);
-		}
+		goto(`/account/${result.id}`);
 	}
 
 	function triggerImport() {
@@ -198,6 +201,35 @@
 		draggedIndex = null;
 		dragOverIndex = null;
 	}
+
+	function startEditingVaultName() {
+		editedVaultName = vaultName;
+		isEditingVaultName = true;
+	}
+
+	function cancelEditingVaultName() {
+		isEditingVaultName = false;
+		editedVaultName = '';
+	}
+
+	function saveVaultName() {
+		const trimmed = editedVaultName.trim();
+		if (trimmed && trimmed !== vaultName) {
+			onRenameVault(trimmed);
+			settingsMessage = 'Vault renamed';
+		}
+		isEditingVaultName = false;
+		editedVaultName = '';
+	}
+
+	function handleVaultNameKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			saveVaultName();
+		} else if (e.key === 'Escape') {
+			cancelEditingVaultName();
+		}
+	}
 </script>
 
 <div class="otp-list">
@@ -206,6 +238,46 @@
 		<div class="settings-panel">
 			<div class="settings-content">
 				<h2>Settings</h2>
+
+				<div class="setting-item">
+					<div class="setting-info">
+						<span class="setting-label">Vault Name</span>
+						<span class="setting-description">
+							Rename your current vault
+						</span>
+					</div>
+					{#if isEditingVaultName}
+						<div class="rename-input-group">
+							<input
+								type="text"
+								class="rename-input"
+								bind:value={editedVaultName}
+								onkeydown={handleVaultNameKeydown}
+								placeholder="Vault name"
+							/>
+							<button type="button" class="save-btn" onclick={saveVaultName} aria-label="Save">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<polyline points="20 6 9 17 4 12"></polyline>
+								</svg>
+							</button>
+							<button type="button" class="cancel-edit-btn" onclick={cancelEditingVaultName} aria-label="Cancel">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<line x1="18" y1="6" x2="6" y2="18"></line>
+									<line x1="6" y1="6" x2="18" y2="18"></line>
+								</svg>
+							</button>
+						</div>
+					{:else}
+						<button type="button" class="edit-name-btn" onclick={startEditingVaultName}>
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+								<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+							</svg>
+							{vaultName}
+						</button>
+					{/if}
+				</div>
+
 				{#if biometricAvailable}
 					<div class="setting-item">
 						<div class="setting-info">
@@ -287,12 +359,33 @@
 				{#if settingsMessage}
 					<p class="settings-message">{settingsMessage}</p>
 				{/if}
+
+				<div class="danger-zone">
+					<h3>Danger Zone</h3>
+					{#if showDeleteVaultConfirm}
+						<div class="delete-confirm">
+							<p>Are you sure you want to delete "{vaultName}"? This will permanently delete all accounts in this vault.</p>
+							<div class="delete-actions">
+								<button type="button" class="cancel-btn" onclick={() => (showDeleteVaultConfirm = false)}>
+									Cancel
+								</button>
+								<button type="button" class="delete-btn" onclick={onDeleteVault}>
+									Delete Vault
+								</button>
+							</div>
+						</div>
+					{:else}
+						<button type="button" class="delete-vault-btn" onclick={() => (showDeleteVaultConfirm = true)}>
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<polyline points="3 6 5 6 21 6"></polyline>
+								<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+							</svg>
+							Delete Vault
+						</button>
+					{/if}
+				</div>
 			</div>
 		</div>
-	{/if}
-
-	{#if scannerMessage}
-		<div class="toast-message">{scannerMessage}</div>
 	{/if}
 
 	<main>
@@ -467,6 +560,77 @@
 		color: var(--text-secondary);
 	}
 
+	.edit-name-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		background: transparent;
+		border: 1px solid var(--border);
+		border-radius: 0.5rem;
+		color: var(--text-primary);
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: border-color 0.2s, background-color 0.2s;
+	}
+
+	.edit-name-btn:hover {
+		border-color: var(--accent);
+		background: var(--bg);
+	}
+
+	.rename-input-group {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.rename-input {
+		width: 140px;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--accent);
+		border-radius: 0.5rem;
+		background: var(--input-bg);
+		color: var(--text-primary);
+		font-size: 0.875rem;
+	}
+
+	.rename-input:focus {
+		outline: none;
+	}
+
+	.save-btn,
+	.cancel-edit-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border: none;
+		border-radius: 0.375rem;
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+
+	.save-btn {
+		background: var(--accent);
+		color: white;
+	}
+
+	.save-btn:hover {
+		opacity: 0.9;
+	}
+
+	.cancel-edit-btn {
+		background: var(--border);
+		color: var(--text-secondary);
+	}
+
+	.cancel-edit-btn:hover {
+		background: var(--text-muted);
+		color: var(--text-primary);
+	}
+
 	.hidden-input {
 		position: absolute;
 		width: 1px;
@@ -526,6 +690,92 @@
 	.export-btn:disabled {
 		opacity: 0.6;
 		cursor: not-allowed;
+	}
+
+	.danger-zone {
+		margin-top: 1.5rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--border);
+	}
+
+	.danger-zone h3 {
+		margin: 0 0 0.75rem;
+		font-size: 0.75rem;
+		color: var(--error);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		font-weight: 600;
+	}
+
+	.delete-vault-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.625rem 1rem;
+		background: transparent;
+		border: 1px solid var(--error);
+		border-radius: 0.5rem;
+		color: var(--error);
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: background-color 0.2s, color 0.2s;
+	}
+
+	.delete-vault-btn:hover {
+		background: var(--error);
+		color: white;
+	}
+
+	.delete-confirm {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.delete-confirm p {
+		margin: 0;
+		font-size: 0.875rem;
+		color: var(--text-secondary);
+	}
+
+	.delete-actions {
+		display: flex;
+		gap: 0.75rem;
+	}
+
+	.cancel-btn {
+		flex: 1;
+		padding: 0.625rem 1rem;
+		background: transparent;
+		border: 1px solid var(--border);
+		border-radius: 0.5rem;
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: background-color 0.2s, color 0.2s;
+	}
+
+	.cancel-btn:hover {
+		background: var(--border);
+		color: var(--text-primary);
+	}
+
+	.delete-btn {
+		flex: 1;
+		padding: 0.625rem 1rem;
+		background: var(--error);
+		border: none;
+		border-radius: 0.5rem;
+		color: white;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: opacity 0.2s;
+	}
+
+	.delete-btn:hover {
+		opacity: 0.9;
 	}
 
 	main {
@@ -638,36 +888,16 @@
 	.import-btn:focus-visible,
 	.export-btn:focus-visible,
 	.add-first-btn:focus-visible,
-	.add-account-btn:focus-visible {
+	.add-account-btn:focus-visible,
+	.delete-vault-btn:focus-visible,
+	.cancel-btn:focus-visible,
+	.delete-btn:focus-visible,
+	.edit-name-btn:focus-visible,
+	.save-btn:focus-visible,
+	.cancel-edit-btn:focus-visible,
+	.rename-input:focus-visible {
 		outline: 2px solid var(--accent);
 		outline-offset: 2px;
-	}
-
-	.toast-message {
-		position: fixed;
-		bottom: 2rem;
-		left: 50%;
-		transform: translateX(-50%);
-		background: var(--card-bg);
-		border: 1px solid var(--border);
-		padding: 0.75rem 1.25rem;
-		border-radius: 0.5rem;
-		font-size: 0.875rem;
-		color: var(--text-primary);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		z-index: 50;
-		animation: slide-up 0.2s ease-out;
-	}
-
-	@keyframes slide-up {
-		from {
-			opacity: 0;
-			transform: translateX(-50%) translateY(1rem);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(-50%) translateY(0);
-		}
 	}
 
 	/* Reduced motion */
@@ -679,7 +909,12 @@
 		.add-first-btn,
 		.add-account-btn,
 		.account-item,
-		.toast-message {
+		.delete-vault-btn,
+		.cancel-btn,
+		.delete-btn,
+		.edit-name-btn,
+		.save-btn,
+		.cancel-edit-btn {
 			transition: none;
 			animation: none;
 		}

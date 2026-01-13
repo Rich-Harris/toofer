@@ -5,6 +5,7 @@
 	import {
 		getAccountById,
 		getPassphrase,
+		getCurrentVaultId,
 		isUnlocked,
 		deleteAccount,
 		updateAccount,
@@ -159,7 +160,7 @@
 	async function handleDelete() {
 		if (account) {
 			deleteAccount(account.id);
-			await saveVault(getAccounts(), getPassphrase());
+			await saveVault(getCurrentVaultId(), getAccounts(), getPassphrase());
 			goto('/');
 		}
 	}
@@ -167,7 +168,7 @@
 	async function handleSave() {
 		if (account && (editIssuer !== account.issuer || editName !== account.name)) {
 			updateAccount(account.id, { issuer: editIssuer, name: editName });
-			await saveVault(getAccounts(), getPassphrase());
+			await saveVault(getCurrentVaultId(), getAccounts(), getPassphrase());
 			account = getAccountById(account.id);
 		}
 		editing = false;

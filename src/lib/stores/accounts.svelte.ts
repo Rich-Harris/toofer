@@ -5,6 +5,7 @@ let accounts = $state<Account[]>([]);
 let passphrase = $state('');
 let unlocked = $state(false);
 let showSettings = $state(false);
+let currentVaultId = $state('');
 
 export function getAccounts() {
 	return accounts;
@@ -45,11 +46,20 @@ export function deleteAccount(id: string) {
 	accounts = accounts.filter((a) => a.id !== id);
 }
 
+export function getCurrentVaultId() {
+	return currentVaultId;
+}
+
+export function setCurrentVaultId(id: string) {
+	currentVaultId = id;
+}
+
 export function lock() {
 	accounts = [];
 	passphrase = '';
 	unlocked = false;
 	showSettings = false;
+	currentVaultId = '';
 }
 
 export function isShowingSettings() {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import type { Account } from '$lib/types';
-	import { hasVault, saveVault, loadVault } from '$lib/storage';
+	import { hasVault, saveVault, loadVault, createVault, deleteVault, getVaultInfo, renameVault } from '$lib/storage';
 	import * as accountStore from '$lib/stores/accounts.svelte';
 	import UnlockScreen from '$lib/components/UnlockScreen.svelte';
 	import OTPList from '$lib/components/OTPList.svelte';
@@ -10,41 +10,47 @@
 	let unlocked = $derived(accountStore.isUnlocked());
 	let accounts = $derived(accountStore.getAccounts());
 	let currentPassphrase = $derived(accountStore.getPassphrase());
+	let currentVaultId = $derived(accountStore.getCurrentVaultId());
+	let currentVaultName = $derived(getVaultInfo(currentVaultId)?.name ?? 'Vault');
+
 	// Initialize as null to indicate "checking" state, preventing layout shift
-	let isNewVault = $state<boolean | null>(null);
+	let ready = $state<boolean>(false);
 
 	$effect(() => {
 		if (browser) {
-			isNewVault = !hasVault();
+			ready = true;
 		}
 	});
 
-	async function handleUnlock(passphrase: string) {
-		let loadedAccounts: Account[];
-		if (isNewVault) {
-			loadedAccounts = [];
-			await saveVault(loadedAccounts, passphrase);
-		} else {
-			loadedAccounts = await loadVault(passphrase);
-		}
-		// Update store - derived values will automatically update
+	async function handleUnlock(vaultId: string, passphrase: string) {
+		const loadedAccounts = await loadVault(vaultId, passphrase);
 		accountStore.setAccounts(loadedAccounts);
 		accountStore.setPassphrase(passphrase);
+		accountStore.setCurrentVaultId(vaultId);
 		accountStore.setUnlocked(true);
 	}
 
-	function isDuplicate(account: Account): boolean {
-		return accounts.some((a) => a.secret === account.secret);
+	async function handleCreateVault(name: string, passphrase: string) {
+		const vaultId = await createVault(name, [], passphrase);
+		accountStore.setAccounts([]);
+		accountStore.setPassphrase(passphrase);
+		accountStore.setCurrentVaultId(vaultId);
+		accountStore.setUnlocked(true);
 	}
 
-	async function handleAddAccount(account: Account): Promise<{ added: boolean; duplicate: boolean }> {
-		if (isDuplicate(account)) {
-			return { added: false, duplicate: true };
+	function findDuplicate(account: Account): Account | undefined {
+		return accounts.find((a) => a.secret === account.secret);
+	}
+
+	async function handleAddAccount(account: Account): Promise<{ added: boolean; duplicate: boolean; id: string }> {
+		const existing = findDuplicate(account);
+		if (existing) {
+			return { added: false, duplicate: true, id: existing.id };
 		}
 		const updated = [...accounts, account];
-		await saveVault(updated, currentPassphrase);
+		await saveVault(currentVaultId, updated, currentPassphrase);
 		accountStore.setAccounts(updated);
-		return { added: true, duplicate: false };
+		return { added: true, duplicate: false, id: account.id };
 	}
 
 	async function handleImportAccounts(newAccounts: Account[]): Promise<{ added: number; duplicates: number }> {
@@ -63,7 +69,7 @@
 
 		if (uniqueNewAccounts.length > 0) {
 			const updated = [...accounts, ...uniqueNewAccounts];
-			await saveVault(updated, currentPassphrase);
+			await saveVault(currentVaultId, updated, currentPassphrase);
 			accountStore.setAccounts(updated);
 		}
 
@@ -71,8 +77,17 @@
 	}
 
 	async function handleReorderAccounts(reordered: Account[]) {
-		await saveVault(reordered, currentPassphrase);
+		await saveVault(currentVaultId, reordered, currentPassphrase);
 		accountStore.setAccounts(reordered);
+	}
+
+	function handleDeleteVault() {
+		deleteVault(currentVaultId);
+		accountStore.lock();
+	}
+
+	function handleRenameVault(newName: string) {
+		renameVault(currentVaultId, newName);
 	}
 </script>
 
@@ -87,9 +102,12 @@
 		onAddAccount={handleAddAccount}
 		onImportAccounts={handleImportAccounts}
 		onReorderAccounts={handleReorderAccounts}
+		onDeleteVault={handleDeleteVault}
+		onRenameVault={handleRenameVault}
 		passphrase={currentPassphrase}
+		vaultName={currentVaultName}
 	/>
-{:else if isNewVault === null}
+{:else if !ready}
 	<!-- Loading state while checking vault status -->
 	<div class="loading-screen">
 		<div class="loading-card">
@@ -101,7 +119,10 @@
 		</div>
 	</div>
 {:else}
-	<UnlockScreen onUnlock={handleUnlock} isNewVault={isNewVault ?? false} />
+	<UnlockScreen
+		onUnlock={handleUnlock}
+		onCreateVault={handleCreateVault}
+	/>
 {/if}
 
 <style>

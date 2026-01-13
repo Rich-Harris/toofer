@@ -15,3 +15,9 @@ export interface AppState {
 	unlocked: boolean;
 	accounts: Account[];
 }
+
+export interface VaultInfo {
+	id: string;
+	name: string;
+	createdAt: number;
+}
