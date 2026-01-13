@@ -233,7 +233,7 @@
 							id="passphrase"
 							type={showPassphrase ? 'text' : 'password'}
 							bind:value={passphrase}
-							placeholder="Enter your passphrase"
+							placeholder="Enter your passphrase…"
 							disabled={loading}
 							autocomplete="current-password"
 						/>
@@ -290,7 +290,7 @@
 						id="vault-name"
 						type="text"
 						bind:value={vaultName}
-						placeholder="e.g., Personal, Work"
+						placeholder="e.g., Personal, Work…"
 						disabled={loading}
 					/>
 				</div>
@@ -302,7 +302,7 @@
 							id="new-passphrase"
 							type={showPassphrase ? 'text' : 'password'}
 							bind:value={passphrase}
-							placeholder="Enter a passphrase"
+							placeholder="Enter a passphrase…"
 							disabled={loading}
 							autocomplete="new-password"
 						/>
@@ -334,7 +334,7 @@
 							id="confirm"
 							type={showConfirmPassphrase ? 'text' : 'password'}
 							bind:value={confirmPassphrase}
-							placeholder="Confirm your passphrase"
+							placeholder="Confirm your passphrase…"
 							disabled={loading}
 							autocomplete="new-password"
 						/>

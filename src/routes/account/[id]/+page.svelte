@@ -298,7 +298,7 @@
 							<img src={qrCodeDataUrl} alt="QR code for {account.issuer}" />
 						{/if}
 						{#if qrCopied}
-							<span class="qr-copied-toast">URL Copied!</span>
+							<span class="qr-copied-toast" role="status" aria-live="polite">URL Copied!</span>
 						{/if}
 					</button>
 				{:else if showExportAuth}
@@ -308,7 +308,7 @@
 							<input
 								type={showExportPassphrase ? 'text' : 'password'}
 								bind:value={exportPassphrase}
-								placeholder="Enter passphrase"
+								placeholder="Enter passphrase…"
 								disabled={exportLoading}
 							/>
 							<button

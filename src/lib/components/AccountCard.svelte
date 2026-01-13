@@ -88,7 +88,7 @@
 		<div class="timer-bar-progress" style="width: {progress * 100}%"></div>
 	</div>
 	{#if copied}
-		<span class="copied-toast">Copied!</span>
+		<span class="copied-toast" role="status" aria-live="polite">Copied!</span>
 	{/if}
 </div>
 

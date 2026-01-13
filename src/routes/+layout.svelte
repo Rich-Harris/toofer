@@ -17,6 +17,10 @@
 		box-sizing: border-box;
 	}
 
+	:global(button, a, input, select, [role="button"]) {
+		touch-action: manipulation;
+	}
+
 	:global(html, body) {
 		margin: 0;
 		padding: 0;

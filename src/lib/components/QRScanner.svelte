@@ -172,7 +172,12 @@
 	}
 </script>
 
-<div class="scanner-overlay" onclick={(e) => e.target === e.currentTarget && onClose()}>
+<div
+	class="scanner-overlay"
+	onclick={(e) => e.target === e.currentTarget && onClose()}
+	onkeydown={(e) => e.key === 'Escape' && onClose()}
+	role="presentation"
+>
 	<div class="scanner-modal" bind:this={modalRef} role="dialog" aria-modal="true" aria-labelledby="scanner-title">
 		<header>
 			<h2 id="scanner-title">Add Account</h2>
@@ -194,7 +199,7 @@
 							id="issuer"
 							type="text"
 							bind:value={manualIssuer}
-							placeholder="e.g., Google, GitHub"
+							placeholder="e.g., Google, GitHub…"
 						/>
 					</div>
 
@@ -204,7 +209,7 @@
 							id="name"
 							type="text"
 							bind:value={manualName}
-							placeholder="e.g., your@email.com"
+							placeholder="e.g., your@email.com…"
 						/>
 					</div>
 
@@ -214,7 +219,7 @@
 							id="secret"
 							type="text"
 							bind:value={manualSecret}
-							placeholder="e.g., JBSWY3DPEHPK3PXP"
+							placeholder="e.g., JBSWY3DPEHPK3PXP…"
 							autocapitalize="characters"
 							autocomplete="off"
 						/>
@@ -316,7 +321,7 @@
 		color: var(--text-secondary);
 		cursor: pointer;
 		border-radius: 0.5rem;
-		transition: all 0.2s;
+		transition: background-color 0.2s, color 0.2s;
 	}
 
 	.close-btn:hover {
@@ -451,7 +456,7 @@
 		color: var(--text-secondary);
 		font-size: 0.9375rem;
 		cursor: pointer;
-		transition: all 0.2s;
+		transition: background-color 0.2s, color 0.2s;
 		margin-top: 1rem;
 	}
 
