@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import type { Account } from '$lib/types';
-	import { hasVault, saveVault, loadVault, createVault, deleteVault, getVaultInfo, renameVault } from '$lib/storage';
+	import { saveVault, loadVault, createVault } from '$lib/storage';
 	import * as accountStore from '$lib/stores/accounts.svelte';
 	import UnlockScreen from '$lib/components/UnlockScreen.svelte';
 	import OTPList from '$lib/components/OTPList.svelte';
@@ -12,7 +12,6 @@
 	let accounts = $derived(accountStore.getAccounts());
 	let currentPassphrase = $derived(accountStore.getPassphrase());
 	let currentVaultId = $derived(accountStore.getCurrentVaultId());
-	let currentVaultName = $derived(getVaultInfo(currentVaultId)?.name ?? 'Vault');
 
 	// Initialize as null to indicate "checking" state, preventing layout shift
 	let ready = $state<boolean>(false);
@@ -54,41 +53,9 @@
 		return { added: true, duplicate: false, id: account.id };
 	}
 
-	async function handleImportAccounts(newAccounts: Account[]): Promise<{ added: number; duplicates: number }> {
-		const existingSecrets = new Set(accounts.map((a) => a.secret));
-		const uniqueNewAccounts: Account[] = [];
-		let duplicates = 0;
-
-		for (const account of newAccounts) {
-			if (existingSecrets.has(account.secret)) {
-				duplicates++;
-			} else {
-				existingSecrets.add(account.secret); // Prevent duplicates within the import batch
-				uniqueNewAccounts.push(account);
-			}
-		}
-
-		if (uniqueNewAccounts.length > 0) {
-			const updated = [...accounts, ...uniqueNewAccounts];
-			await saveVault(currentVaultId, updated, currentPassphrase);
-			accountStore.setAccounts(updated);
-		}
-
-		return { added: uniqueNewAccounts.length, duplicates };
-	}
-
 	async function handleReorderAccounts(reordered: Account[]) {
 		await saveVault(currentVaultId, reordered, currentPassphrase);
 		accountStore.setAccounts(reordered);
-	}
-
-	function handleDeleteVault() {
-		deleteVault(currentVaultId);
-		accountStore.lock();
-	}
-
-	function handleRenameVault(newName: string) {
-		renameVault(currentVaultId, newName);
 	}
 </script>
 
@@ -101,12 +68,7 @@
 	<OTPList
 		{accounts}
 		onAddAccount={handleAddAccount}
-		onImportAccounts={handleImportAccounts}
 		onReorderAccounts={handleReorderAccounts}
-		onDeleteVault={handleDeleteVault}
-		onRenameVault={handleRenameVault}
-		passphrase={currentPassphrase}
-		vaultName={currentVaultName}
 	/>
 {:else if !ready}
 	<!-- Loading state while checking vault status -->

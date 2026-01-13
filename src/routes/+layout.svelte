@@ -1,6 +1,7 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.png';
 	import Header from '$lib/components/Header.svelte';
+	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
 
 	let { children } = $props();
 </script>
@@ -10,6 +11,7 @@
 </svelte:head>
 
 <Header />
+<SettingsPanel />
 {@render children()}
 
 <style>

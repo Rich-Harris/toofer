@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import Logo from './Logo.svelte';
 	import * as accountStore from '$lib/stores/accounts.svelte';
@@ -13,12 +12,7 @@
 	}
 
 	function handleSettings() {
-		if ($page.url.pathname !== '/') {
-			accountStore.setShowSettings(true);
-			goto('/');
-		} else {
-			accountStore.toggleSettings();
-		}
+		accountStore.toggleSettings();
 	}
 </script>
 
