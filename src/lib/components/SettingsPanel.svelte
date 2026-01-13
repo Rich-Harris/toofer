@@ -207,6 +207,7 @@
 							bind:value={editedVaultName}
 							onkeydown={handleVaultNameKeydown}
 							placeholder="Vault name…"
+							aria-label="Vault name"
 						/>
 						<button type="button" class="save-btn" onclick={saveVaultName} aria-label="Save">
 							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -310,7 +311,7 @@
 			</div>
 
 			{#if settingsMessage}
-				<p class="settings-message">{settingsMessage}</p>
+				<p class="settings-message" role="status" aria-live="polite">{settingsMessage}</p>
 			{/if}
 
 			<div class="danger-zone">

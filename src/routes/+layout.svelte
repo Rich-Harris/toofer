@@ -8,6 +8,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<meta name="theme-color" content="#0f0f0f" />
 </svelte:head>
 
 <Header />
@@ -21,6 +22,14 @@
 
 	:global(button, a, input, select, [role="button"]) {
 		touch-action: manipulation;
+	}
+
+	:global(html) {
+		color-scheme: dark;
+	}
+
+	:global([data-theme='light'] html) {
+		color-scheme: light;
 	}
 
 	:global(html, body) {
