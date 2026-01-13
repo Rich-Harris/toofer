@@ -14,6 +14,7 @@
 	import { saveVault } from '$lib/storage';
 	import { generateTOTP, getTimeRemaining, getProgress } from '$lib/totp';
 	import { accountToOTPAuthURI } from '$lib/otpauth';
+	import { hasBiometricCredential, authenticateWithBiometric } from '$lib/webauthn';
 	import QRCode from 'qrcode';
 	import type { Account } from '$lib/types';
 
@@ -28,6 +29,20 @@
 	let editName = $state('');
 	let qrCodeDataUrl = $state('');
 	let qrCopied = $state(false);
+
+	// Export authentication state
+	let exportUnlocked = $state(false);
+	let showExportAuth = $state(false);
+	let exportPassphrase = $state('');
+	let exportError = $state('');
+	let exportLoading = $state(false);
+	let biometricAvailable = $state(false);
+
+	$effect(() => {
+		if (browser) {
+			biometricAvailable = hasBiometricCredential();
+		}
+	});
 
 	$effect(() => {
 		if (browser) {
@@ -72,7 +87,7 @@
 	});
 
 	$effect(() => {
-		if (!account) return;
+		if (!account || !exportUnlocked) return;
 
 		const otpauthUrl = accountToOTPAuthURI(account);
 		QRCode.toDataURL(otpauthUrl, {
@@ -86,6 +101,45 @@
 			qrCodeDataUrl = url;
 		});
 	});
+
+	function handleExportClick() {
+		showExportAuth = true;
+		exportPassphrase = '';
+		exportError = '';
+	}
+
+	async function handleExportPassphraseSubmit(e: Event) {
+		e.preventDefault();
+		exportError = '';
+		exportLoading = true;
+
+		try {
+			const correctPassphrase = getPassphrase();
+			if (exportPassphrase === correctPassphrase) {
+				exportUnlocked = true;
+				showExportAuth = false;
+			} else {
+				exportError = 'Incorrect passphrase';
+			}
+		} finally {
+			exportLoading = false;
+		}
+	}
+
+	async function handleExportBiometric() {
+		exportError = '';
+		exportLoading = true;
+
+		try {
+			await authenticateWithBiometric();
+			exportUnlocked = true;
+			showExportAuth = false;
+		} catch {
+			exportError = 'Biometric authentication failed';
+		} finally {
+			exportLoading = false;
+		}
+	}
 
 	async function copyOTPAuthUrl() {
 		if (!account) return;
@@ -192,15 +246,65 @@
 
 			<div class="qr-card">
 				<h2>Export Account</h2>
-				<p>Scan this QR code to add this account to another device</p>
-				<button type="button" class="qr-code" onclick={copyOTPAuthUrl} aria-label="Copy otpauth URL">
-					{#if qrCodeDataUrl}
-						<img src={qrCodeDataUrl} alt="QR code for {account.issuer}" />
-					{/if}
-					{#if qrCopied}
-						<span class="qr-copied-toast">URL Copied!</span>
-					{/if}
-				</button>
+				{#if exportUnlocked}
+					<p>Scan this QR code to add this account to another device</p>
+					<button type="button" class="qr-code" onclick={copyOTPAuthUrl} aria-label="Copy otpauth URL">
+						{#if qrCodeDataUrl}
+							<img src={qrCodeDataUrl} alt="QR code for {account.issuer}" />
+						{/if}
+						{#if qrCopied}
+							<span class="qr-copied-toast">URL Copied!</span>
+						{/if}
+					</button>
+				{:else if showExportAuth}
+					<p>Re-enter your passphrase to reveal the export QR code</p>
+					<form class="export-auth-form" onsubmit={handleExportPassphraseSubmit}>
+						<input
+							type="password"
+							bind:value={exportPassphrase}
+							placeholder="Enter passphrase"
+							disabled={exportLoading}
+						/>
+						<div class="export-auth-actions">
+							<button
+								type="button"
+								class="cancel-btn"
+								onclick={() => (showExportAuth = false)}
+								disabled={exportLoading}
+							>
+								Cancel
+							</button>
+							<button type="submit" class="save-btn" disabled={exportLoading || !exportPassphrase}>
+								{exportLoading ? 'Verifying...' : 'Unlock'}
+							</button>
+						</div>
+						{#if biometricAvailable}
+							<button
+								type="button"
+								class="biometric-btn"
+								onclick={handleExportBiometric}
+								disabled={exportLoading}
+							>
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04c.054-.024.108-.05.162-.077a9.96 9.96 0 0 0 2.018-1.435M6.5 12c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5c0 3.527-1.317 6.746-3.485 9.196M17 12c0-2.761-2.239-5-5-5s-5 2.239-5 5m10 0H7m5-7v0a7 7 0 0 1 7 7v0m-7-7a7 7 0 0 0-7 7v0"></path>
+								</svg>
+								Use Biometrics
+							</button>
+						{/if}
+						{#if exportError}
+							<p class="export-error">{exportError}</p>
+						{/if}
+					</form>
+				{:else}
+					<p>Authenticate to reveal the export QR code</p>
+					<button type="button" class="reveal-btn" onclick={handleExportClick}>
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+							<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+						</svg>
+						Reveal QR Code
+					</button>
+				{/if}
 			</div>
 
 			<div class="danger-zone">
@@ -489,6 +593,84 @@
 		}
 	}
 
+	.export-auth-form {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.export-auth-form input {
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--border);
+		border-radius: 0.5rem;
+		background: var(--input-bg);
+		color: var(--text-primary);
+		font-size: 1rem;
+		text-align: center;
+	}
+
+	.export-auth-form input:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+
+	.export-auth-actions {
+		display: flex;
+		gap: 0.75rem;
+	}
+
+	.biometric-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		background: transparent;
+		border: 1px solid var(--border);
+		border-radius: 0.5rem;
+		color: var(--text-secondary);
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: background-color 0.2s, color 0.2s;
+	}
+
+	.biometric-btn:hover {
+		background: var(--border);
+		color: var(--text-primary);
+	}
+
+	.biometric-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.reveal-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.25rem;
+		background: var(--accent);
+		border: none;
+		border-radius: 0.5rem;
+		color: white;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: opacity 0.2s;
+	}
+
+	.reveal-btn:hover {
+		opacity: 0.9;
+	}
+
+	.export-error {
+		margin: 0;
+		padding: 0.5rem;
+		color: var(--error);
+		font-size: 0.875rem;
+	}
+
 	.danger-zone {
 		background: var(--card-bg);
 		border: 1px solid var(--error);
@@ -546,12 +728,15 @@
 	.cancel-btn:focus-visible,
 	.save-btn:focus-visible,
 	.delete-btn:focus-visible,
-	.qr-code:focus-visible {
+	.qr-code:focus-visible,
+	.biometric-btn:focus-visible,
+	.reveal-btn:focus-visible {
 		outline: 2px solid var(--accent);
 		outline-offset: 2px;
 	}
 
-	.field input:focus-visible {
+	.field input:focus-visible,
+	.export-auth-form input:focus-visible {
 		outline: 2px solid var(--accent);
 		outline-offset: 2px;
 	}
@@ -564,7 +749,9 @@
 		.delete-btn,
 		.otp-value,
 		.qr-code,
-		.qr-copied-toast {
+		.qr-copied-toast,
+		.biometric-btn,
+		.reveal-btn {
 			transition: none;
 			animation: none;
 		}
