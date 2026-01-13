@@ -66,6 +66,10 @@ export function isShowingSettings() {
 	return showSettings;
 }
 
+export function setShowSettings(value: boolean) {
+	showSettings = value;
+}
+
 export function toggleSettings() {
 	showSettings = !showSettings;
 }
