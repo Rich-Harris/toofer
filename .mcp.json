@@ -1,10 +1,17 @@
 {
-	"mcpServers": {
-		"svelte": {
-			"type": "stdio",
-			"command": "npx",
-			"env": {},
-			"args": ["-y", "@sveltejs/mcp"]
-		}
-	}
+  "mcpServers": {
+    "svelte": {
+      "type": "stdio",
+      "command": "npx",
+      "env": {},
+      "args": [
+        "-y",
+        "@sveltejs/mcp"
+      ]
+    },
+    "dev3000": {
+      "type": "http",
+      "url": "http://localhost:3684/mcp"
+    }
+  }
 }
