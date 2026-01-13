@@ -17,6 +17,7 @@
 		onImportAccounts,
 		onDeleteAccount,
 		onEditAccount,
+		onReorderAccounts,
 		passphrase
 	}: {
 		accounts: Account[];
@@ -25,6 +26,7 @@
 		onImportAccounts: (accounts: Account[]) => void;
 		onDeleteAccount: (id: string) => void;
 		onEditAccount: (account: Account) => void;
+		onReorderAccounts: (accounts: Account[]) => void;
 		passphrase: string;
 	} = $props();
 
@@ -36,6 +38,8 @@
 	let settingsLoading = $state(false);
 	let fileInput: HTMLInputElement | undefined = $state();
 	let importLoading = $state(false);
+	let draggedIndex = $state<number | null>(null);
+	let dragOverIndex = $state<number | null>(null);
 
 	$effect(() => {
 		checkBiometricStatus();
@@ -138,6 +142,48 @@
 
 		URL.revokeObjectURL(url);
 		settingsMessage = `Exported ${accounts.length} account${accounts.length === 1 ? '' : 's'}`;
+	}
+
+	function handleDragStart(e: DragEvent, index: number) {
+		draggedIndex = index;
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = 'move';
+			e.dataTransfer.setData('text/plain', String(index));
+		}
+	}
+
+	function handleDragOver(e: DragEvent, index: number) {
+		e.preventDefault();
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = 'move';
+		}
+		dragOverIndex = index;
+	}
+
+	function handleDragLeave() {
+		dragOverIndex = null;
+	}
+
+	function handleDrop(e: DragEvent, dropIndex: number) {
+		e.preventDefault();
+		if (draggedIndex === null || draggedIndex === dropIndex) {
+			draggedIndex = null;
+			dragOverIndex = null;
+			return;
+		}
+
+		const reordered = [...accounts];
+		const [removed] = reordered.splice(draggedIndex, 1);
+		reordered.splice(dropIndex, 0, removed);
+		onReorderAccounts(reordered);
+
+		draggedIndex = null;
+		dragOverIndex = null;
+	}
+
+	function handleDragEnd() {
+		draggedIndex = null;
+		dragOverIndex = null;
 	}
 </script>
 
@@ -329,12 +375,34 @@
 			</div>
 		{:else}
 			<div class="accounts">
-				{#each accounts as account (account.id)}
-					<AccountCard
-							{account}
-							onDelete={() => onDeleteAccount(account.id)}
-							onEdit={(updated) => onEditAccount(updated)}
-						/>
+				{#each accounts as account, index (account.id)}
+					<div
+						class="account-item"
+						class:dragging={draggedIndex === index}
+						class:drag-over={dragOverIndex === index && draggedIndex !== index}
+						draggable="true"
+						ondragstart={(e) => handleDragStart(e, index)}
+						ondragover={(e) => handleDragOver(e, index)}
+						ondragleave={handleDragLeave}
+						ondrop={(e) => handleDrop(e, index)}
+						ondragend={handleDragEnd}
+						role="listitem"
+					>
+						<div class="drag-handle" aria-label="Drag to reorder">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<line x1="8" y1="6" x2="16" y2="6"></line>
+								<line x1="8" y1="12" x2="16" y2="12"></line>
+								<line x1="8" y1="18" x2="16" y2="18"></line>
+							</svg>
+						</div>
+						<div class="account-item-content">
+							<AccountCard
+								{account}
+								onDelete={() => onDeleteAccount(account.id)}
+								onEdit={(updated) => onEditAccount(updated)}
+							/>
+						</div>
+					</div>
 				{/each}
 			</div>
 		{/if}
@@ -618,6 +686,61 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
+	}
+
+	.account-item {
+		position: relative;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		transition: opacity 0.2s, transform 0.2s;
+	}
+
+	.account-item.dragging {
+		opacity: 0.5;
+	}
+
+	.account-item.drag-over {
+		transform: translateY(4px);
+	}
+
+	.account-item.drag-over::before {
+		content: '';
+		position: absolute;
+		top: -4px;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: var(--accent);
+		border-radius: 1px;
+	}
+
+	.drag-handle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem 0.25rem;
+		color: var(--text-muted);
+		cursor: grab;
+		opacity: 0;
+		transition: opacity 0.2s, color 0.2s;
+	}
+
+	.account-item:hover .drag-handle {
+		opacity: 1;
+	}
+
+	.drag-handle:hover {
+		color: var(--text-secondary);
+	}
+
+	.drag-handle:active {
+		cursor: grabbing;
+	}
+
+	.account-item-content {
+		flex: 1;
+		min-width: 0;
 	}
 
 	.empty-state {

@@ -55,6 +55,11 @@
 		accounts = accounts.map((a) => (a.id === updated.id ? updated : a));
 		await saveVault(accounts, currentPassphrase);
 	}
+
+	async function handleReorderAccounts(reordered: Account[]) {
+		accounts = reordered;
+		await saveVault(accounts, currentPassphrase);
+	}
 </script>
 
 <svelte:head>
@@ -70,6 +75,7 @@
 		onImportAccounts={handleImportAccounts}
 		onDeleteAccount={handleDeleteAccount}
 		onEditAccount={handleEditAccount}
+		onReorderAccounts={handleReorderAccounts}
 		passphrase={currentPassphrase}
 	/>
 {:else}
