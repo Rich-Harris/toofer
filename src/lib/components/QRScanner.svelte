@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { Html5Qrcode } from 'html5-qrcode';
+	import type { Html5Qrcode } from 'html5-qrcode';
 	import { parseOTPAuthURI, otpAuthToAccount, isValidOTPAuthURI } from '$lib/otpauth';
 	import type { Account } from '$lib/types';
 
@@ -77,6 +77,7 @@
 		scanning = true;
 
 		try {
+			const { Html5Qrcode } = await import('html5-qrcode');
 			html5Qrcode = new Html5Qrcode('qr-reader');
 
 			await html5Qrcode.start(
