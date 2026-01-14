@@ -2,17 +2,17 @@
 	import { goto } from '$app/navigation';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import Logo from './Logo.svelte';
-	import * as accountStore from '$lib/stores/accounts.svelte';
+	import { vault, settings } from '$lib/stores/accounts.svelte';
 	import Settings from '@lucide/svelte/icons/settings';
 	import Lock from '@lucide/svelte/icons/lock';
 
 	function handleLock() {
-		accountStore.lock();
+		vault.lock();
 		goto('/');
 	}
 </script>
 
-{#if accountStore.isUnlocked()}
+{#if vault.unlocked}
 	<header>
 		<div class="header-content">
 			<a href="/" class="logo">
@@ -23,7 +23,7 @@
 				<ThemeToggle />
 				<button
 					class="settings-btn"
-					onclick={() => accountStore.toggleSettings()}
+					onclick={() => settings.toggle()}
 					aria-label="Settings"
 				>
 					<Settings size={20} />
