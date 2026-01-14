@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import type { Html5Qrcode } from 'html5-qrcode';
 	import { parseOTPAuthURI, otpAuthToAccount, isValidOTPAuthURI } from '$lib/otpauth';
 	import type { Account } from '$lib/types';
@@ -9,7 +8,6 @@
 
 	let { onScan, onClose }: { onScan: (account: Account) => void; onClose: () => void } = $props();
 
-	let scannerRef: HTMLDivElement | undefined = $state();
 	let modalRef: HTMLDivElement | undefined = $state();
 	let html5Qrcode: Html5Qrcode | null = null;
 	let error = $state('');
@@ -21,15 +19,6 @@
 	let manualIssuer = $state('');
 	let manualName = $state('');
 	let manualSecret = $state('');
-
-	$effect(() => {
-		if (!manualEntry) {
-			untrack(() => startScanner());
-		}
-		return () => {
-			stopScanner();
-		};
-	});
 
 	// Focus trap and keyboard handling for modal
 	$effect(() => {
@@ -73,42 +62,42 @@
 		};
 	});
 
-	async function startScanner() {
-		if (!scannerRef || scanning) return;
-
+	function scanner(node: HTMLElement) {
 		error = '';
 		scanning = true;
 
-		try {
-			const { Html5Qrcode } = await import('html5-qrcode');
-			html5Qrcode = new Html5Qrcode('qr-reader');
-
-			await html5Qrcode.start(
-				{ facingMode: 'environment' },
-				{
-					fps: 10,
-					qrbox: { width: 250, height: 250 }
-				},
-				onScanSuccess,
-				() => {} // Ignore scan failures (no QR found in frame)
-			);
-		} catch (err) {
-			console.error('Failed to start scanner:', err);
-			error = 'Could not access camera. Please check permissions or use manual entry.';
-			scanning = false;
-		}
-	}
-
-	async function stopScanner() {
-		if (html5Qrcode) {
+		(async () => {
 			try {
-				await html5Qrcode.stop();
-			} catch {
-				// Ignore errors when stopping
+				const { Html5Qrcode } = await import('html5-qrcode');
+				html5Qrcode = new Html5Qrcode(node.id);
+
+				await html5Qrcode.start(
+					{ facingMode: 'environment' },
+					{
+						fps: 10,
+						qrbox: { width: 250, height: 250 }
+					},
+					onScanSuccess,
+					() => {} // Ignore scan failures (no QR found in frame)
+				);
+			} catch (err) {
+				console.error('Failed to start scanner:', err);
+				error = 'Could not access camera. Please check permissions or use manual entry.';
+				scanning = false;
 			}
-			html5Qrcode = null;
-		}
-		scanning = false;
+		})();
+
+		return async () => {
+			if (html5Qrcode) {
+				try {
+					await html5Qrcode.stop();
+				} catch {
+					// Ignore errors when stopping
+				}
+				html5Qrcode = null;
+			}
+			scanning = false;
+		};
 	}
 
 	function onScanSuccess(decodedText: string) {
@@ -120,7 +109,6 @@
 		try {
 			const parsed = parseOTPAuthURI(decodedText);
 			const account = otpAuthToAccount(parsed);
-			stopScanner();
 			onScan(account);
 		} catch (err) {
 			error = 'Failed to parse QR code. Please try again.';
@@ -166,13 +154,7 @@
 	}
 
 	function toggleManualEntry() {
-		if (manualEntry) {
-			manualEntry = false;
-			// Scanner will start via $effect
-		} else {
-			stopScanner();
-			manualEntry = true;
-		}
+		manualEntry = !manualEntry;
 	}
 </script>
 
@@ -243,7 +225,7 @@
 				<p class="instructions">Scan the QR code from your authenticator setup page</p>
 
 				<div class="scanner-container">
-					<div id="qr-reader" bind:this={scannerRef}></div>
+					<div id="qr-reader" {@attach scanner}></div>
 					{#if !scanning && !error}
 						<div class="scanner-loading">
 							<span>Starting camera...</span>
