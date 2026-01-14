@@ -343,199 +343,81 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 1rem;
+		padding: var(--space-lg);
 	}
 
 	.unlock-card {
 		background: var(--card-bg);
 		border-radius: var(--radius-lg);
 		corner-shape: squircle;
-		padding: 2rem;
+		padding: var(--space-2xl);
 		width: 100%;
 		max-width: 400px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		box-shadow: var(--shadow-md);
 	}
 
 	.logo {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 0.75rem;
-		margin-bottom: 0.5rem;
+		gap: var(--space-md);
+		margin-bottom: var(--space-sm);
 	}
 
 	h1 {
 		margin: 0;
-		font-size: 2rem;
+		font-size: var(--text-3xl);
 		color: var(--text-primary);
 	}
 
 	.subtitle {
 		text-align: center;
 		color: var(--text-secondary);
-		margin-bottom: 1.5rem;
+		margin-bottom: var(--space-xl);
 	}
 
 	.back-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.5rem 0;
+		padding: var(--space-sm) 0;
 		background: transparent;
 		border: none;
 		color: var(--text-secondary);
-		font-size: 0.875rem;
-		cursor: pointer;
-		margin-bottom: 0.5rem;
-		transition: color 0.2s;
+		margin-bottom: var(--space-sm);
 	}
 
 	.back-btn:hover {
 		color: var(--text-primary);
+		opacity: 1;
 	}
 
 	.biometric-btn {
 		width: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		padding: 1rem;
+		padding: var(--space-lg);
 		margin-top: 1.25rem;
-		background: var(--accent);
-		color: white;
-		border: none;
-		border-radius: 0.5rem;
-		font-size: 1rem;
+		font-size: var(--text-base);
 		font-weight: 600;
-		cursor: pointer;
-		transition: opacity 0.2s;
-	}
-
-	.biometric-btn:hover:not(:disabled) {
-		opacity: 0.9;
-	}
-
-	.biometric-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
-	.divider {
-		display: flex;
-		align-items: center;
-		margin: 1.5rem 0;
-		gap: 1rem;
-	}
-
-	.divider::before,
-	.divider::after {
-		content: '';
-		flex: 1;
-		height: 1px;
-		background: var(--border);
-	}
-
-	.divider span {
-		color: var(--text-muted);
-		font-size: 0.875rem;
 	}
 
 	form {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
-		margin-top: 0.5rem;
+		gap: var(--space-lg);
+		margin-top: var(--space-sm);
 	}
 
 	.input-group {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--space-sm);
 	}
 
 	label {
-		font-size: 0.875rem;
+		font-size: var(--text-sm);
 		color: var(--text-secondary);
-	}
-
-	.input-with-toggle {
-		position: relative;
-		display: flex;
-	}
-
-	.input-with-toggle input {
-		flex: 1;
-		padding-right: 3rem;
-	}
-
-	.toggle-visibility {
-		position: absolute;
-		right: 0.5rem;
-		top: 50%;
-		transform: translateY(-50%);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.25rem;
-		height: 2.25rem;
-		background: transparent;
-		border: none;
-		border-radius: 0.375rem;
-		color: var(--text-muted);
-		cursor: pointer;
-		transition: color 0.2s, background-color 0.2s;
-	}
-
-	.toggle-visibility:hover {
-		color: var(--text-primary);
-		background: var(--border);
-	}
-
-	.toggle-visibility:focus-visible {
-		outline: 2px solid var(--accent);
-		outline-offset: 2px;
-	}
-
-	input,
-	select {
-		padding: 0.875rem 1rem;
-		border: 1px solid var(--border);
-		border-radius: 0.5rem;
-		background: var(--input-bg);
-		color: var(--text-primary);
-		font-size: 1rem;
-		transition: border-color 0.2s;
-	}
-
-	select {
-		cursor: pointer;
-		appearance: none;
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-		background-repeat: no-repeat;
-		background-position: right 1rem center;
-		padding-right: 2.5rem;
-	}
-
-	input:focus,
-	select:focus {
-		outline: none;
-		border-color: var(--accent);
-	}
-
-	input:focus-visible,
-	select:focus-visible {
-		outline: 2px solid var(--accent);
-		outline-offset: 2px;
-	}
-
-	input::placeholder {
-		color: var(--text-muted);
 	}
 
 	.error {
 		color: var(--error);
-		font-size: 0.875rem;
+		font-size: var(--text-sm);
 		margin: 0;
 		text-align: center;
 	}
@@ -544,66 +426,31 @@
 		font-size: 0.8125rem;
 		color: var(--text-muted);
 		text-align: center;
-		margin: 1rem 0 0;
+		margin: var(--space-lg) 0 0;
 	}
 
 	.submit-btn {
-		padding: 0.875rem 1rem;
-		background: var(--accent);
-		color: white;
-		border: none;
-		border-radius: 0.5rem;
-		font-size: 1rem;
+		padding: 0.875rem var(--space-lg);
+		font-size: var(--text-base);
 		font-weight: 600;
-		cursor: pointer;
-		transition: opacity 0.2s;
-		margin-top: 0.5rem;
-	}
-
-	.submit-btn:hover:not(:disabled) {
-		opacity: 0.9;
-	}
-
-	.submit-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
+		margin-top: var(--space-sm);
 	}
 
 	.biometric-placeholder {
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
+		gap: var(--space-xl);
 		margin-top: 1.25rem;
 	}
 
 	.biometric-btn-placeholder {
 		height: 56px;
 		background: var(--border);
-		border-radius: 0.5rem;
+		border-radius: var(--radius-md);
 		opacity: 0.3;
 	}
 
 	.divider-placeholder {
 		height: 24px;
-	}
-
-	/* Focus visible for buttons */
-	.biometric-btn:focus-visible,
-	.submit-btn:focus-visible,
-	.back-btn:focus-visible {
-		outline: 2px solid var(--accent);
-		outline-offset: 2px;
-	}
-
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		input,
-		select,
-		.biometric-btn,
-		.submit-btn,
-		.toggle-visibility,
-		.back-btn {
-			transition: none;
-		}
 	}
 </style>

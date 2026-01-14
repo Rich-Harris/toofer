@@ -21,14 +21,10 @@
 			</a>
 			<div class="header-actions">
 				<ThemeToggle />
-				<button
-					class="settings-btn"
-					onclick={() => settings.toggle()}
-					aria-label="Settings"
-				>
+				<button class="icon" onclick={() => settings.toggle()} aria-label="Settings">
 					<Settings size={20} />
 				</button>
-				<button class="lock-btn" onclick={handleLock}>
+				<button class="secondary" onclick={handleLock}>
 					<Lock size={20} />
 					Lock
 				</button>
@@ -41,7 +37,7 @@
 	header {
 		background: var(--card-bg);
 		border-bottom: 1px solid var(--border);
-		padding: 1rem;
+		padding: var(--space-lg);
 		position: sticky;
 		top: 0;
 		z-index: 10;
@@ -52,78 +48,26 @@
 		margin: 0 auto;
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: var(--space-lg);
 	}
 
 	.logo {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--space-sm);
 		text-decoration: none;
 		margin-right: auto;
 	}
 
 	h1 {
 		margin: 0;
-		font-size: 1.25rem;
+		font-size: var(--text-xl);
 		color: var(--text-primary);
 	}
 
 	.header-actions {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.settings-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.5rem;
-		background: transparent;
-		border: 1px solid var(--border);
-		border-radius: 0.5rem;
-		color: var(--text-secondary);
-		cursor: pointer;
-		transition: background-color 0.2s, color 0.2s;
-	}
-
-	.settings-btn:hover {
-		background: var(--bg);
-		color: var(--text-primary);
-	}
-
-	.lock-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.875rem;
-		background: transparent;
-		border: 1px solid var(--border);
-		border-radius: 0.5rem;
-		color: var(--text-secondary);
-		cursor: pointer;
-		font-size: 0.875rem;
-		transition: background-color 0.2s, color 0.2s;
-	}
-
-	.lock-btn:hover {
-		background: var(--bg);
-		color: var(--text-primary);
-	}
-
-	/* Focus visible */
-	.settings-btn:focus-visible,
-	.lock-btn:focus-visible {
-		outline: 2px solid var(--accent);
-		outline-offset: 2px;
-	}
-
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.settings-btn,
-		.lock-btn {
-			transition: none;
-		}
+		gap: var(--space-sm);
 	}
 </style>
