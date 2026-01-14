@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { browser } from '$app/environment';
 	import { vault } from '$lib/stores/accounts.svelte';
 	import { saveVault } from '$lib/storage';
 	import { generateTOTP, getTimeRemaining, getProgress } from '$lib/totp';
@@ -38,31 +37,25 @@
 	let showExportPassphrase = $state(false);
 	let exportError = $state('');
 	let exportLoading = $state(false);
-	let biometricAvailable = $state(false);
+	const biometricAvailable = hasBiometricCredential();
 
 	$effect(() => {
-		biometricAvailable = hasBiometricCredential();
-	});
-
-	$effect(() => {
-		if (browser) {
-			if (!vault.unlocked) {
-				goto('/');
-				return;
-			}
-			const id = params.id;
-			if (!id) {
-				goto('/');
-				return;
-			}
-			account = vault.getAccountById(id);
-			if (!account) {
-				goto('/');
-				return;
-			}
-			editIssuer = account.issuer;
-			editName = account.name;
+		if (!vault.unlocked) {
+			goto('/');
+			return;
 		}
+		const id = params.id;
+		if (!id) {
+			goto('/');
+			return;
+		}
+		account = vault.getAccountById(id);
+		if (!account) {
+			goto('/');
+			return;
+		}
+		editIssuer = account.issuer;
+		editName = account.name;
 	});
 
 	$effect(() => {
