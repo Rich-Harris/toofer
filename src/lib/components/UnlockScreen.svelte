@@ -204,7 +204,6 @@
 					</div>
 				{:else if biometricAvailable && hasBiometric}
 					<button
-						type="button"
 						class="biometric-btn"
 						onclick={handleBiometricUnlock}
 						disabled={loading}
@@ -273,7 +272,7 @@
 
 		{:else if currentView === 'create'}
 			{#if vaults.length > 0}
-				<button type="button" class="back-btn" onclick={backToUnlock}>
+				<button class="back-btn" onclick={backToUnlock}>
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 						<polyline points="15 18 9 12 15 6"></polyline>
 					</svg>

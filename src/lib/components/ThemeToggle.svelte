@@ -21,7 +21,6 @@
 </script>
 
 <button
-	type="button"
 	class="theme-toggle"
 	onclick={handleToggle}
 	aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}

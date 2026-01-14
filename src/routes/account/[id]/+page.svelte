@@ -253,7 +253,6 @@
 					{:else}
 						<h1 class="issuer-name">{account.issuer}</h1>
 						<button
-							type="button"
 							class="edit-icon-btn"
 							onclick={() => (editingIssuer = true)}
 							aria-label="Edit service name"
@@ -277,7 +276,6 @@
 					{:else}
 						<span class="account-name">{account.name}</span>
 						<button
-							type="button"
 							class="edit-icon-btn"
 							onclick={() => (editingName = true)}
 							aria-label="Edit account name"
@@ -294,7 +292,6 @@
 
 		<main>
 			<button
-				type="button"
 				class="otp-display"
 				onclick={copyOTP}
 				aria-label="Copy code to clipboard"
@@ -314,7 +311,7 @@
 				<h2>Export Account</h2>
 				{#if exportUnlocked}
 					<p>Scan this QR code to add this account to another device</p>
-					<button type="button" class="qr-code" onclick={copyOTPAuthUrl} aria-label="Copy otpauth URL">
+					<button class="qr-code" onclick={copyOTPAuthUrl} aria-label="Copy otpauth URL">
 						{#if qrCodeDataUrl}
 							<img src={qrCodeDataUrl} alt="QR code for {account.issuer}" />
 						{/if}
@@ -383,7 +380,7 @@
 					</form>
 				{:else}
 					<p>Authenticate to reveal the export QR code</p>
-					<button type="button" class="reveal-btn" onclick={handleExportClick}>
+					<button class="reveal-btn" onclick={handleExportClick}>
 						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
 							<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
@@ -399,15 +396,15 @@
 					<div class="delete-confirm">
 						<p>Are you sure you want to delete this account? This action cannot be undone.</p>
 						<div class="delete-actions">
-							<button type="button" class="cancel-btn" onclick={() => (showDeleteConfirm = false)}
+							<button class="cancel-btn" onclick={() => (showDeleteConfirm = false)}
 								>Cancel</button
 							>
-							<button type="button" class="delete-btn" onclick={handleDelete}>Delete Account</button
+							<button class="delete-btn" onclick={handleDelete}>Delete Account</button
 							>
 						</div>
 					</div>
 				{:else}
-					<button type="button" class="delete-btn" onclick={() => (showDeleteConfirm = true)}>
+					<button class="delete-btn" onclick={() => (showDeleteConfirm = true)}>
 						<svg
 							width="16"
 							height="16"

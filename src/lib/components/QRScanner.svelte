@@ -181,7 +181,7 @@
 	<div class="scanner-modal" bind:this={modalRef} role="dialog" aria-modal="true" aria-labelledby="scanner-title">
 		<header>
 			<h2 id="scanner-title">Add Account</h2>
-			<button type="button" class="close-btn" onclick={onClose} aria-label="Close">
+			<button class="close-btn" onclick={onClose} aria-label="Close">
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<path d="M18 6L6 18M6 6l12 12"></path>
 				</svg>
@@ -254,7 +254,7 @@
 				{/if}
 			{/if}
 
-			<button type="button" class="toggle-btn" onclick={toggleManualEntry}>
+			<button class="toggle-btn" onclick={toggleManualEntry}>
 				{#if manualEntry}
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 						<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>

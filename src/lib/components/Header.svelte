@@ -28,7 +28,6 @@
 				<button
 					class="settings-btn"
 					onclick={handleSettings}
-					type="button"
 					aria-label="Settings"
 				>
 					<svg
@@ -45,7 +44,7 @@
 						></path>
 					</svg>
 				</button>
-				<button class="lock-btn" onclick={handleLock} type="button">
+				<button class="lock-btn" onclick={handleLock}>
 					<svg
 						width="20"
 						height="20"

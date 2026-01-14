@@ -86,7 +86,7 @@
 				</div>
 				<p>No accounts yet</p>
 				<p class="hint">Scan a QR code to add your first 2FA account</p>
-				<button class="add-first-btn" onclick={() => (showScanner = true)} type="button">
+				<button class="add-first-btn" onclick={() => (showScanner = true)}>
 					<svg
 						width="20"
 						height="20"
@@ -119,7 +119,7 @@
 							<AccountCard {account} />
 					</div>
 				{/each}
-				<button class="add-account-btn" onclick={() => (showScanner = true)} type="button">
+				<button class="add-account-btn" onclick={() => (showScanner = true)}>
 					<svg
 						width="20"
 						height="20"
