@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { browser } from '$app/environment';
 	import {
 		getAccountById,
 		getPassphrase,
@@ -50,30 +49,26 @@
 	let biometricAvailable = $state(false);
 
 	$effect(() => {
-		if (browser) {
-			biometricAvailable = hasBiometricCredential();
-		}
+		biometricAvailable = hasBiometricCredential();
 	});
 
 	$effect(() => {
-		if (browser) {
-			if (!isUnlocked()) {
-				goto('/');
-				return;
-			}
-			const id = params.id;
-			if (!id) {
-				goto('/');
-				return;
-			}
-			account = getAccountById(id);
-			if (!account) {
-				goto('/');
-				return;
-			}
-			editIssuer = account.issuer;
-			editName = account.name;
+		if (!isUnlocked()) {
+			goto('/');
+			return;
 		}
+		const id = params.id;
+		if (!id) {
+			goto('/');
+			return;
+		}
+		account = getAccountById(id);
+		if (!account) {
+			goto('/');
+			return;
+		}
+		editIssuer = account.issuer;
+		editName = account.name;
 	});
 
 	$effect(() => {

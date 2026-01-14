@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import type { Account } from '$lib/types';
 	import { saveVault, loadVault, createVault } from '$lib/storage';
 	import * as accountStore from '$lib/stores/accounts.svelte';
@@ -17,9 +16,7 @@
 	let ready = $state<boolean>(false);
 
 	$effect(() => {
-		if (browser) {
-			ready = true;
-		}
+		ready = true;
 	});
 
 	async function handleUnlock(vaultId: string, passphrase: string) {
