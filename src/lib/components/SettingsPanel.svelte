@@ -205,21 +205,20 @@
 					<div class="rename-input-group">
 						<input
 							type="text"
-							class="rename-input"
 							bind:value={editedVaultName}
 							onkeydown={handleVaultNameKeydown}
 							placeholder="Vault name…"
 							aria-label="Vault name"
 						/>
-						<button class="save-btn" onclick={saveVaultName} aria-label="Save">
+						<button onclick={saveVaultName} aria-label="Save">
 							<Check size={16} />
 						</button>
-						<button class="cancel-edit-btn" onclick={cancelEditingVaultName} aria-label="Cancel">
+						<button class="secondary" onclick={cancelEditingVaultName} aria-label="Cancel">
 							<X size={16} />
 						</button>
 					</div>
 				{:else}
-					<button class="edit-name-btn" onclick={startEditingVaultName}>
+					<button class="secondary" onclick={startEditingVaultName}>
 						<SquarePen size={16} />
 						{vaultName}
 					</button>
@@ -262,11 +261,7 @@
 					onchange={handleFileImport}
 					class="hidden-input"
 				/>
-				<button
-					class="import-btn"
-					onclick={triggerImport}
-					disabled={importLoading}
-				>
+				<button onclick={triggerImport} disabled={importLoading}>
 					{#if importLoading}
 						Importing...
 					{:else}
@@ -283,11 +278,7 @@
 						Download accounts as otpauth:// URLs
 					</span>
 				</div>
-				<button
-					class="export-btn"
-					onclick={handleExport}
-					disabled={vault.accounts.length === 0}
-				>
+				<button class="secondary" onclick={handleExport} disabled={vault.accounts.length === 0}>
 					<Download size={16} />
 					Export
 				</button>
@@ -303,16 +294,16 @@
 					<div class="delete-confirm">
 						<p>Are you sure you want to delete "{vaultName}"? This will permanently delete all accounts in this vault.</p>
 						<div class="delete-actions">
-							<button class="cancel-btn" onclick={() => (showDeleteVaultConfirm = false)}>
+							<button class="secondary" onclick={() => (showDeleteVaultConfirm = false)}>
 								Cancel
 							</button>
-							<button class="delete-btn" onclick={handleDeleteVault}>
+							<button class="danger" onclick={handleDeleteVault}>
 								Delete Vault
 							</button>
 						</div>
 					</div>
 				{:else}
-					<button class="delete-vault-btn" onclick={() => (showDeleteVaultConfirm = true)}>
+					<button class="danger-outline" onclick={() => (showDeleteVaultConfirm = true)}>
 						<Trash2 size={16} />
 						Delete Vault
 					</button>
@@ -326,7 +317,7 @@
 	.settings-panel {
 		background: var(--card-bg);
 		border-bottom: 1px solid var(--border);
-		padding: 1rem;
+		padding: var(--space-lg);
 	}
 
 	.settings-content {
@@ -335,8 +326,8 @@
 	}
 
 	.settings-content h2 {
-		margin: 0 0 1rem;
-		font-size: 1rem;
+		margin: 0 0 var(--space-lg);
+		font-size: var(--text-base);
 		color: var(--text-primary);
 	}
 
@@ -344,13 +335,13 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0.75rem 0;
+		padding: var(--space-md) 0;
 	}
 
 	.setting-info {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: var(--space-xs);
 	}
 
 	.setting-label {
@@ -365,10 +356,11 @@
 
 	.no-biometric {
 		color: var(--text-secondary);
-		font-size: 0.875rem;
+		font-size: var(--text-sm);
 		margin: 0;
 	}
 
+	/* Toggle switch - custom component */
 	.toggle-btn {
 		position: relative;
 		width: 48px;
@@ -376,18 +368,11 @@
 		background: var(--border);
 		border: none;
 		border-radius: 14px;
-		cursor: pointer;
-		transition: background 0.2s;
 		padding: 0;
 	}
 
 	.toggle-btn.active {
 		background: var(--accent);
-	}
-
-	.toggle-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
 	}
 
 	.toggle-slider {
@@ -398,7 +383,7 @@
 		height: 24px;
 		background: white;
 		border-radius: 12px;
-		transition: transform 0.2s;
+		transition: transform var(--transition-base);
 	}
 
 	.toggle-btn.active .toggle-slider {
@@ -406,83 +391,31 @@
 	}
 
 	.settings-message {
-		margin: 0.75rem 0 0;
-		padding: 0.5rem 0.75rem;
+		margin: var(--space-md) 0 0;
+		padding: var(--space-sm) var(--space-md);
 		background: var(--bg);
-		border-radius: 0.5rem;
-		font-size: 0.875rem;
+		border-radius: var(--radius-md);
+		font-size: var(--text-sm);
 		color: var(--text-secondary);
-	}
-
-	.edit-name-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.75rem;
-		background: transparent;
-		border: 1px solid var(--border);
-		border-radius: 0.5rem;
-		color: var(--text-primary);
-		font-size: 0.875rem;
-		cursor: pointer;
-		transition: border-color 0.2s, background-color 0.2s;
-	}
-
-	.edit-name-btn:hover {
-		border-color: var(--accent);
-		background: var(--bg);
 	}
 
 	.rename-input-group {
 		display: flex;
 		align-items: center;
-		gap: 0.375rem;
+		gap: var(--space-sm);
 	}
 
-	.rename-input {
+	.rename-input-group input {
 		width: 140px;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid var(--accent);
-		border-radius: 0.5rem;
-		background: var(--input-bg);
-		color: var(--text-primary);
-		font-size: 0.875rem;
+		padding: var(--space-sm) var(--space-md);
+		font-size: var(--text-sm);
+		border-color: var(--accent);
 	}
 
-	.rename-input:focus {
-		outline: none;
-	}
-
-	.save-btn,
-	.cancel-edit-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
+	.rename-input-group button {
 		width: 32px;
 		height: 32px;
-		border: none;
-		border-radius: 0.375rem;
-		cursor: pointer;
-		transition: background-color 0.2s;
-	}
-
-	.save-btn {
-		background: var(--accent);
-		color: white;
-	}
-
-	.save-btn:hover {
-		opacity: 0.9;
-	}
-
-	.cancel-edit-btn {
-		background: var(--border);
-		color: var(--text-secondary);
-	}
-
-	.cancel-edit-btn:hover {
-		background: var(--text-muted);
-		color: var(--text-primary);
+		padding: 0;
 	}
 
 	.hidden-input {
@@ -497,170 +430,39 @@
 		border: 0;
 	}
 
-	.import-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.5rem 0.875rem;
-		background: var(--accent);
-		border: none;
-		border-radius: 0.5rem;
-		color: white;
-		font-size: 0.875rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: opacity 0.2s;
-	}
-
-	.import-btn:hover {
-		opacity: 0.9;
-	}
-
-	.import-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
-	.export-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.5rem 0.875rem;
-		background: transparent;
-		border: 1px solid var(--border);
-		border-radius: 0.5rem;
-		color: var(--text-secondary);
-		font-size: 0.875rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: background-color 0.2s, color 0.2s;
-	}
-
-	.export-btn:hover {
-		background: var(--bg);
-		color: var(--text-primary);
-	}
-
-	.export-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
 	.danger-zone {
-		margin-top: 1.5rem;
-		padding-top: 1rem;
+		margin-top: var(--space-xl);
+		padding-top: var(--space-lg);
 		border-top: 1px solid var(--border);
 	}
 
 	.danger-zone h3 {
-		margin: 0 0 0.75rem;
-		font-size: 0.75rem;
+		margin: 0 0 var(--space-md);
+		font-size: var(--text-xs);
 		color: var(--error);
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		font-weight: 600;
 	}
 
-	.delete-vault-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.625rem 1rem;
-		background: transparent;
-		border: 1px solid var(--error);
-		border-radius: 0.5rem;
-		color: var(--error);
-		font-size: 0.875rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: background-color 0.2s, color 0.2s;
-	}
-
-	.delete-vault-btn:hover {
-		background: var(--error);
-		color: white;
-	}
-
 	.delete-confirm {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: var(--space-md);
 	}
 
 	.delete-confirm p {
 		margin: 0;
-		font-size: 0.875rem;
+		font-size: var(--text-sm);
 		color: var(--text-secondary);
 	}
 
 	.delete-actions {
 		display: flex;
-		gap: 0.75rem;
+		gap: var(--space-md);
 	}
 
-	.cancel-btn {
+	.delete-actions button {
 		flex: 1;
-		padding: 0.625rem 1rem;
-		background: transparent;
-		border: 1px solid var(--border);
-		border-radius: 0.5rem;
-		color: var(--text-secondary);
-		font-size: 0.875rem;
-		cursor: pointer;
-		transition: background-color 0.2s, color 0.2s;
-	}
-
-	.cancel-btn:hover {
-		background: var(--border);
-		color: var(--text-primary);
-	}
-
-	.delete-btn {
-		flex: 1;
-		padding: 0.625rem 1rem;
-		background: var(--error);
-		border: none;
-		border-radius: 0.5rem;
-		color: white;
-		font-size: 0.875rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: opacity 0.2s;
-	}
-
-	.delete-btn:hover {
-		opacity: 0.9;
-	}
-
-	/* Focus visible for all buttons */
-	.toggle-btn:focus-visible,
-	.import-btn:focus-visible,
-	.export-btn:focus-visible,
-	.delete-vault-btn:focus-visible,
-	.cancel-btn:focus-visible,
-	.delete-btn:focus-visible,
-	.edit-name-btn:focus-visible,
-	.save-btn:focus-visible,
-	.cancel-edit-btn:focus-visible,
-	.rename-input:focus-visible {
-		outline: 2px solid var(--accent);
-		outline-offset: 2px;
-	}
-
-	/* Reduced motion */
-	@media (prefers-reduced-motion: reduce) {
-		.toggle-btn,
-		.toggle-slider,
-		.import-btn,
-		.export-btn,
-		.delete-vault-btn,
-		.cancel-btn,
-		.delete-btn,
-		.edit-name-btn,
-		.save-btn,
-		.cancel-edit-btn {
-			transition: none;
-			animation: none;
-		}
 	}
 </style>
