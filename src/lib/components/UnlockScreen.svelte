@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import {
 		isPlatformAuthenticatorAvailable,
 		hasBiometricCredential,
@@ -21,10 +20,15 @@
 		onCreateVault: (name: string, passphrase: string) => Promise<void>;
 	} = $props();
 
+	// Initialize vault list and biometric availability at top level
+	const initialVaults = getVaultList();
+	const hasBiometric = hasBiometricCredential();
+	const biometricAvailable = await isPlatformAuthenticatorAvailable();
+
 	// View states
 	type View = 'unlock' | 'create';
-	let currentView = $state<View>('unlock');
-	let selectedVaultId = $state<string>('');
+	let currentView = $state<View>(initialVaults.length > 0 ? 'unlock' : 'create');
+	let selectedVaultId = $state<string>(initialVaults.length > 0 ? initialVaults[0].id : '');
 
 	// Form state
 	let passphrase = $state('');
@@ -35,36 +39,11 @@
 	let error = $state('');
 	let loading = $state(false);
 
-	// Vault list
-	let vaults = $state<VaultInfo[]>([]);
-
-	// Biometric
-	let biometricAvailable = $state<boolean | null>(null);
-	let hasBiometric = $state<boolean | null>(null);
+	// Vault list (can be updated when creating new vaults)
+	let vaults = $state<VaultInfo[]>(initialVaults);
 
 	// Derived: get the selected vault object
 	let selectedVault = $derived(vaults.find((v) => v.id === selectedVaultId) ?? null);
-
-	$effect(() => {
-		untrack(() => {
-			vaults = getVaultList();
-
-			// Auto-select first vault or show create view
-			if (vaults.length > 0) {
-				selectedVaultId = vaults[0].id;
-				currentView = 'unlock';
-			} else {
-				currentView = 'create';
-			}
-
-			checkBiometricAvailability();
-		});
-	});
-
-	async function checkBiometricAvailability() {
-		hasBiometric = hasBiometricCredential();
-		biometricAvailable = await isPlatformAuthenticatorAvailable();
-	}
 
 	function handleVaultChange(e: Event) {
 		const target = e.target as HTMLSelectElement;
