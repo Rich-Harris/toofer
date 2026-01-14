@@ -1,15 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import {
-		getAccountById,
-		getPassphrase,
-		getCurrentVaultId,
-		isUnlocked,
-		deleteAccount,
-		updateAccount,
-		getAccounts,
-		setAccounts
-	} from '$lib/stores/accounts.svelte';
+	import { browser } from '$app/environment';
+	import { vault } from '$lib/stores/accounts.svelte';
 	import { saveVault } from '$lib/storage';
 	import { generateTOTP, getTimeRemaining, getProgress } from '$lib/totp';
 	import { accountToOTPAuthURI } from '$lib/otpauth';
@@ -53,22 +45,24 @@
 	});
 
 	$effect(() => {
-		if (!isUnlocked()) {
-			goto('/');
-			return;
+		if (browser) {
+			if (!vault.unlocked) {
+				goto('/');
+				return;
+			}
+			const id = params.id;
+			if (!id) {
+				goto('/');
+				return;
+			}
+			account = vault.getAccountById(id);
+			if (!account) {
+				goto('/');
+				return;
+			}
+			editIssuer = account.issuer;
+			editName = account.name;
 		}
-		const id = params.id;
-		if (!id) {
-			goto('/');
-			return;
-		}
-		account = getAccountById(id);
-		if (!account) {
-			goto('/');
-			return;
-		}
-		editIssuer = account.issuer;
-		editName = account.name;
 	});
 
 	$effect(() => {
@@ -120,8 +114,7 @@
 		exportLoading = true;
 
 		try {
-			const correctPassphrase = getPassphrase();
-			if (exportPassphrase === correctPassphrase) {
+			if (exportPassphrase === vault.passphrase) {
 				exportUnlocked = true;
 				showExportAuth = false;
 			} else {
@@ -175,26 +168,26 @@
 
 	async function handleDelete() {
 		if (account) {
-			deleteAccount(account.id);
-			await saveVault(getCurrentVaultId(), getAccounts(), getPassphrase());
+			vault.deleteAccount(account.id);
+			await saveVault(vault.currentId, vault.accounts, vault.passphrase);
 			goto('/');
 		}
 	}
 
 	async function saveIssuer() {
 		if (account && editIssuer.trim() && editIssuer !== account.issuer) {
-			updateAccount(account.id, { issuer: editIssuer.trim() });
-			await saveVault(getCurrentVaultId(), getAccounts(), getPassphrase());
-			account = getAccountById(account.id);
+			vault.updateAccount(account.id, { issuer: editIssuer.trim() });
+			await saveVault(vault.currentId, vault.accounts, vault.passphrase);
+			account = vault.getAccountById(account.id);
 		}
 		editingIssuer = false;
 	}
 
 	async function saveName() {
 		if (account && editName.trim() && editName !== account.name) {
-			updateAccount(account.id, { name: editName.trim() });
-			await saveVault(getCurrentVaultId(), getAccounts(), getPassphrase());
-			account = getAccountById(account.id);
+			vault.updateAccount(account.id, { name: editName.trim() });
+			await saveVault(vault.currentId, vault.accounts, vault.passphrase);
+			account = vault.getAccountById(account.id);
 		}
 		editingName = false;
 	}

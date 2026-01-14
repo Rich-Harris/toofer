@@ -8,7 +8,7 @@
 	} from '$lib/webauthn';
 	import { parseOTPAuthURI, otpAuthToAccount, isValidOTPAuthURI, accountToOTPAuthURI } from '$lib/otpauth';
 	import { saveVault, deleteVault, getVaultInfo, renameVault } from '$lib/storage';
-	import * as accountStore from '$lib/stores/accounts.svelte';
+	import { vault, settings } from '$lib/stores/accounts.svelte';
 	import Check from '@lucide/svelte/icons/check';
 	import X from '@lucide/svelte/icons/x';
 	import SquarePen from '@lucide/svelte/icons/square-pen';
@@ -16,11 +16,7 @@
 	import Download from '@lucide/svelte/icons/download';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 
-	let accounts = $derived(accountStore.getAccounts());
-	let passphrase = $derived(accountStore.getPassphrase());
-	let currentVaultId = $derived(accountStore.getCurrentVaultId());
-	let vaultName = $derived(getVaultInfo(currentVaultId)?.name ?? 'Vault');
-	let showSettings = $derived(accountStore.isShowingSettings());
+	let vaultName = $derived(getVaultInfo(vault.currentId)?.name ?? 'Vault');
 
 	let biometricAvailable = $state(false);
 	let biometricEnabled = $state(false);
@@ -51,7 +47,7 @@
 				biometricEnabled = false;
 				settingsMessage = 'Biometric login disabled';
 			} else {
-				await registerBiometric(passphrase);
+				await registerBiometric(vault.passphrase);
 				biometricEnabled = true;
 				settingsMessage = 'Biometric login enabled!';
 			}
@@ -94,7 +90,7 @@
 			}
 
 			if (importedAccounts.length > 0) {
-				const existingSecrets = new Set(accounts.map((a) => a.secret));
+				const existingSecrets = new Set(vault.accounts.map((a) => a.secret));
 				const uniqueNewAccounts: Account[] = [];
 				let duplicates = 0;
 
@@ -108,9 +104,9 @@
 				}
 
 				if (uniqueNewAccounts.length > 0) {
-					const updated = [...accounts, ...uniqueNewAccounts];
-					await saveVault(currentVaultId, updated, passphrase);
-					accountStore.setAccounts(updated);
+					const updated = [...vault.accounts, ...uniqueNewAccounts];
+					await saveVault(vault.currentId, updated, vault.passphrase);
+					vault.accounts = updated;
 				}
 
 				const parts: string[] = [];
@@ -136,12 +132,12 @@
 	}
 
 	function handleExport() {
-		if (accounts.length === 0) {
+		if (vault.accounts.length === 0) {
 			settingsMessage = 'No accounts to export';
 			return;
 		}
 
-		const lines = accounts.map((account) => accountToOTPAuthURI(account));
+		const lines = vault.accounts.map((account) => accountToOTPAuthURI(account));
 		const content = lines.join('\n');
 		const blob = new Blob([content], { type: 'text/plain' });
 		const url = URL.createObjectURL(blob);
@@ -155,7 +151,7 @@
 		a.click();
 
 		URL.revokeObjectURL(url);
-		settingsMessage = `Exported ${accounts.length} account${accounts.length === 1 ? '' : 's'}`;
+		settingsMessage = `Exported ${vault.accounts.length} account${vault.accounts.length === 1 ? '' : 's'}`;
 	}
 
 	function startEditingVaultName() {
@@ -171,7 +167,7 @@
 	function saveVaultName() {
 		const trimmed = editedVaultName.trim();
 		if (trimmed && trimmed !== vaultName) {
-			renameVault(currentVaultId, trimmed);
+			renameVault(vault.currentId, trimmed);
 			settingsMessage = 'Vault renamed';
 		}
 		isEditingVaultName = false;
@@ -188,12 +184,12 @@
 	}
 
 	function handleDeleteVault() {
-		deleteVault(currentVaultId);
-		accountStore.lock();
+		deleteVault(vault.currentId);
+		vault.lock();
 	}
 </script>
 
-{#if showSettings}
+{#if settings.open}
 	<div class="settings-panel">
 		<div class="settings-content">
 			<h2>Settings</h2>
@@ -290,7 +286,7 @@
 				<button
 					class="export-btn"
 					onclick={handleExport}
-					disabled={accounts.length === 0}
+					disabled={vault.accounts.length === 0}
 				>
 					<Download size={16} />
 					Export

@@ -12,7 +12,7 @@
 		onReorderAccounts
 	}: {
 		accounts: Account[];
-		onAddAccount: (account: Account) => Promise<string>;
+		onAddAccount: (account: Account) => Promise<{ added: boolean; duplicate: boolean; id: string }>;
 		onReorderAccounts: (accounts: Account[]) => void;
 	} = $props();
 
@@ -22,8 +22,8 @@
 
 	async function handleScan(account: Account) {
 		showScanner = false;
-		const id = await onAddAccount(account);
-		goto(`/account/${id}`);
+		const result = await onAddAccount(account);
+		goto(`/account/${result.id}`);
 	}
 
 	function handleDragStart(e: DragEvent, index: number) {

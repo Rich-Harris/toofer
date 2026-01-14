@@ -1,16 +1,10 @@
 <script lang="ts">
 	import type { Account } from '$lib/types';
 	import { saveVault, loadVault, createVault } from '$lib/storage';
-	import * as accountStore from '$lib/stores/accounts.svelte';
+	import { vault } from '$lib/stores/accounts.svelte';
 	import UnlockScreen from '$lib/components/UnlockScreen.svelte';
 	import OTPList from '$lib/components/OTPList.svelte';
 	import Logo from '$lib/components/Logo.svelte';
-
-	// Derive from store so UI updates when Header locks the app
-	let unlocked = $derived(accountStore.isUnlocked());
-	let accounts = $derived(accountStore.getAccounts());
-	let currentPassphrase = $derived(accountStore.getPassphrase());
-	let currentVaultId = $derived(accountStore.getCurrentVaultId());
 
 	// Initialize as null to indicate "checking" state, preventing layout shift
 	let ready = $state<boolean>(false);
@@ -21,38 +15,38 @@
 
 	async function handleUnlock(vaultId: string, passphrase: string) {
 		const loadedAccounts = await loadVault(vaultId, passphrase);
-		accountStore.setAccounts(loadedAccounts);
-		accountStore.setPassphrase(passphrase);
-		accountStore.setCurrentVaultId(vaultId);
-		accountStore.setUnlocked(true);
+		vault.accounts = loadedAccounts;
+		vault.passphrase = passphrase;
+		vault.currentId = vaultId;
+		vault.unlocked = true;
 	}
 
 	async function handleCreateVault(name: string, passphrase: string) {
 		const vaultId = await createVault(name, [], passphrase);
-		accountStore.setAccounts([]);
-		accountStore.setPassphrase(passphrase);
-		accountStore.setCurrentVaultId(vaultId);
-		accountStore.setUnlocked(true);
+		vault.accounts = [];
+		vault.passphrase = passphrase;
+		vault.currentId = vaultId;
+		vault.unlocked = true;
 	}
 
 	function findDuplicate(account: Account): Account | undefined {
-		return accounts.find((a) => a.secret === account.secret);
+		return vault.accounts.find((a) => a.secret === account.secret);
 	}
 
-	async function handleAddAccount(account: Account): Promise<string> {
+	async function handleAddAccount(account: Account): Promise<{ added: boolean; duplicate: boolean; id: string }> {
 		const existing = findDuplicate(account);
 		if (existing) {
-			return existing.id;
+			return { added: false, duplicate: true, id: existing.id };
 		}
-		const updated = [...accounts, account];
-		await saveVault(currentVaultId, updated, currentPassphrase);
-		accountStore.setAccounts(updated);
-		return account.id;
+		const updated = [...vault.accounts, account];
+		await saveVault(vault.currentId, updated, vault.passphrase);
+		vault.accounts = updated;
+		return { added: true, duplicate: false, id: account.id };
 	}
 
 	async function handleReorderAccounts(reordered: Account[]) {
-		await saveVault(currentVaultId, reordered, currentPassphrase);
-		accountStore.setAccounts(reordered);
+		await saveVault(vault.currentId, reordered, vault.passphrase);
+		vault.accounts = reordered;
 	}
 </script>
 
@@ -61,9 +55,9 @@
 	<meta name="description" content="Secure two-factor authentication app" />
 </svelte:head>
 
-{#if unlocked}
+{#if vault.unlocked}
 	<OTPList
-		{accounts}
+		accounts={vault.accounts}
 		onAddAccount={handleAddAccount}
 		onReorderAccounts={handleReorderAccounts}
 	/>
