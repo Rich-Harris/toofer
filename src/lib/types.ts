@@ -11,11 +11,6 @@ export interface EncryptedVault {
 	salt: string; // Base64 encoded salt for key derivation
 }
 
-export interface AppState {
-	unlocked: boolean;
-	accounts: Account[];
-}
-
 export interface VaultInfo {
 	id: string;
 	name: string;

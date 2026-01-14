@@ -42,15 +42,15 @@
 		return accounts.find((a) => a.secret === account.secret);
 	}
 
-	async function handleAddAccount(account: Account): Promise<{ added: boolean; duplicate: boolean; id: string }> {
+	async function handleAddAccount(account: Account): Promise<string> {
 		const existing = findDuplicate(account);
 		if (existing) {
-			return { added: false, duplicate: true, id: existing.id };
+			return existing.id;
 		}
 		const updated = [...accounts, account];
 		await saveVault(currentVaultId, updated, currentPassphrase);
 		accountStore.setAccounts(updated);
-		return { added: true, duplicate: false, id: account.id };
+		return account.id;
 	}
 
 	async function handleReorderAccounts(reordered: Account[]) {
