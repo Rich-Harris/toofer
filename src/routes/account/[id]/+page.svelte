@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import {
@@ -18,6 +17,8 @@
 	import { hasBiometricCredential, authenticateWithBiometric } from '$lib/webauthn';
 	import QRCode from 'qrcode';
 	import type { Account } from '$lib/types';
+
+	let { params } = $props();
 
 	let account = $state<Account | undefined>(undefined);
 	let otp = $state('------');
@@ -54,7 +55,7 @@
 				goto('/');
 				return;
 			}
-			const id = $page.params.id;
+			const id = params.id;
 			if (!id) {
 				goto('/');
 				return;
