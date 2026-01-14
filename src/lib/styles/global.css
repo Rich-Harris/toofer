@@ -1,0 +1,569 @@
+/* ==========================================================================
+   Toofer Design System
+   ========================================================================== */
+
+/* ==========================================================================
+   Reset & Base
+   ========================================================================== */
+
+* {
+	box-sizing: border-box;
+}
+
+button,
+a,
+input,
+select,
+[role='button'] {
+	touch-action: manipulation;
+}
+
+html {
+	color-scheme: dark;
+}
+
+[data-theme='light'] html {
+	color-scheme: light;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	font-family:
+		-apple-system,
+		BlinkMacSystemFont,
+		'Segoe UI',
+		Roboto,
+		Oxygen,
+		Ubuntu,
+		Cantarell,
+		'Open Sans',
+		'Helvetica Neue',
+		sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================================================
+   Design Tokens
+   ========================================================================== */
+
+body {
+	/* Colors - Dark theme (default) */
+	--bg: #0f0f0f;
+	--card-bg: #1a1a1a;
+	--border: #2a2a2a;
+	--input-bg: #0f0f0f;
+	--text-primary: #ffffff;
+	--text-secondary: #a0a0a0;
+	--text-muted: #666666;
+	--accent: hsl(37, 96%, 61%);
+	--accent-secondary: hsl(239, 52%, 45%);
+	--error: #ef4444;
+
+	/* Spacing */
+	--space-xs: 0.25rem;
+	--space-sm: 0.5rem;
+	--space-md: 0.75rem;
+	--space-lg: 1rem;
+	--space-xl: 1.5rem;
+	--space-2xl: 2rem;
+
+	/* Border Radius */
+	--radius-sm: 0.375rem;
+	--radius-md: 0.5rem;
+	--radius-lg: 0.75rem;
+	--radius-xl: 1rem;
+
+	/* Typography */
+	--font-mono: 'SF Mono', 'Fira Code', monospace;
+	--text-xs: 0.75rem;
+	--text-sm: 0.875rem;
+	--text-base: 1rem;
+	--text-lg: 1.125rem;
+	--text-xl: 1.25rem;
+	--text-2xl: 1.5rem;
+	--text-3xl: 2rem;
+
+	/* Transitions */
+	--transition-fast: 0.15s;
+	--transition-base: 0.2s;
+	--transition-slow: 0.3s;
+
+	/* Shadows */
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+	--shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+	/* Apply background */
+	background: var(--bg);
+	color: var(--text-primary);
+	min-height: 100vh;
+}
+
+/* Light theme overrides */
+[data-theme='light'] body {
+	--bg: #f5f5f5;
+	--card-bg: #ffffff;
+	--border: #e5e5e5;
+	--input-bg: #ffffff;
+	--text-primary: #171717;
+	--text-secondary: #525252;
+	--text-muted: #a3a3a3;
+	--accent: hsl(37, 90%, 50%);
+	--accent-secondary: hsl(239, 52%, 37%);
+	--error: #dc2626;
+}
+
+/* ==========================================================================
+   Typography Utilities
+   ========================================================================== */
+
+.text-primary {
+	color: var(--text-primary);
+}
+
+.text-secondary {
+	color: var(--text-secondary);
+}
+
+.text-muted {
+	color: var(--text-muted);
+}
+
+.text-error {
+	color: var(--error);
+}
+
+.text-sm {
+	font-size: var(--text-sm);
+}
+
+.text-mono {
+	font-family: var(--font-mono);
+	font-variant-numeric: tabular-nums;
+}
+
+.text-truncate {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Description text - used for helper text under form labels */
+.description {
+	font-size: var(--text-sm);
+	color: var(--text-secondary);
+}
+
+/* Hint text - used for subtle hints and placeholders */
+.hint {
+	font-size: 0.8125rem;
+	color: var(--text-muted);
+}
+
+/* Error message text */
+.error-text {
+	color: var(--error);
+	font-size: var(--text-sm);
+	margin: 0;
+	text-align: center;
+}
+
+/* ==========================================================================
+   Button Utilities
+   ========================================================================== */
+
+/* Base button reset */
+.btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-sm);
+	padding: var(--space-md) var(--space-lg);
+	border: none;
+	border-radius: var(--radius-md);
+	font-size: var(--text-sm);
+	font-weight: 500;
+	cursor: pointer;
+	transition:
+		background-color var(--transition-base),
+		color var(--transition-base),
+		opacity var(--transition-base);
+}
+
+.btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.btn:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+/* Primary button - accent colored CTA */
+.btn-primary {
+	background: var(--accent);
+	color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+	opacity: 0.9;
+}
+
+/* Secondary button - bordered */
+.btn-secondary {
+	background: transparent;
+	border: 1px solid var(--border);
+	color: var(--text-secondary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+	background: var(--bg);
+	color: var(--text-primary);
+}
+
+/* Danger button - error colored */
+.btn-danger {
+	background: var(--error);
+	color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+	opacity: 0.9;
+}
+
+/* Danger outline button */
+.btn-danger-outline {
+	background: transparent;
+	border: 1px solid var(--error);
+	color: var(--error);
+}
+
+.btn-danger-outline:hover:not(:disabled) {
+	background: var(--error);
+	color: white;
+}
+
+/* Icon button - square, minimal padding */
+.btn-icon {
+	padding: var(--space-sm);
+	background: transparent;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-md);
+	color: var(--text-secondary);
+}
+
+.btn-icon:hover:not(:disabled) {
+	background: var(--bg);
+	color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Form Utilities
+   ========================================================================== */
+
+/* Input group - label + input container */
+.input-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-sm);
+}
+
+.input-group label {
+	font-size: var(--text-sm);
+	color: var(--text-secondary);
+}
+
+/* Standard input styling */
+.input {
+	padding: 0.875rem 1rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-md);
+	background: var(--input-bg);
+	color: var(--text-primary);
+	font-size: var(--text-base);
+	transition: border-color var(--transition-base);
+}
+
+.input:focus {
+	outline: none;
+	border-color: var(--accent);
+}
+
+.input:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+.input::placeholder {
+	color: var(--text-muted);
+}
+
+/* Select styling */
+.select {
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 1rem center;
+	padding-right: 2.5rem;
+	cursor: pointer;
+}
+
+/* Input with visibility toggle container */
+.input-with-toggle {
+	position: relative;
+	display: flex;
+}
+
+.input-with-toggle .input {
+	flex: 1;
+	padding-right: 3rem;
+}
+
+.input-with-toggle .toggle-btn {
+	position: absolute;
+	right: var(--space-sm);
+	top: 50%;
+	transform: translateY(-50%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	background: transparent;
+	border: none;
+	border-radius: var(--radius-sm);
+	color: var(--text-muted);
+	cursor: pointer;
+	transition:
+		color var(--transition-base),
+		background-color var(--transition-base);
+}
+
+.input-with-toggle .toggle-btn:hover {
+	color: var(--text-primary);
+	background: var(--border);
+}
+
+.input-with-toggle .toggle-btn:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Card Utilities
+   ========================================================================== */
+
+.card {
+	background: var(--card-bg);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	padding: var(--space-xl);
+}
+
+.card-interactive {
+	cursor: pointer;
+	transition:
+		transform var(--transition-fast),
+		box-shadow var(--transition-fast);
+}
+
+.card-interactive:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-lg);
+}
+
+.card-interactive:active {
+	transform: translateY(0);
+}
+
+.card-interactive:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Layout Utilities
+   ========================================================================== */
+
+/* Full viewport centered container */
+.viewport-center {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--space-lg);
+}
+
+/* Constrained content width */
+.content-width {
+	max-width: 600px;
+	margin: 0 auto;
+	width: 100%;
+}
+
+.content-width-narrow {
+	max-width: 400px;
+	margin: 0 auto;
+	width: 100%;
+}
+
+/* Flex utilities */
+.flex {
+	display: flex;
+}
+
+.flex-col {
+	display: flex;
+	flex-direction: column;
+}
+
+.flex-center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.items-center {
+	align-items: center;
+}
+
+.justify-between {
+	justify-content: space-between;
+}
+
+.gap-xs {
+	gap: var(--space-xs);
+}
+
+.gap-sm {
+	gap: var(--space-sm);
+}
+
+.gap-md {
+	gap: var(--space-md);
+}
+
+.gap-lg {
+	gap: var(--space-lg);
+}
+
+/* ==========================================================================
+   Component Patterns
+   ========================================================================== */
+
+/* Danger zone section */
+.danger-zone {
+	margin-top: var(--space-xl);
+	padding-top: var(--space-lg);
+	border-top: 1px solid var(--border);
+}
+
+.danger-zone h3 {
+	margin: 0 0 var(--space-md);
+	font-size: var(--text-xs);
+	color: var(--error);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	font-weight: 600;
+}
+
+/* Toast notification */
+.toast {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: var(--accent);
+	color: white;
+	padding: var(--space-sm) var(--space-lg);
+	border-radius: var(--radius-md);
+	font-size: var(--text-sm);
+	font-weight: 600;
+	animation: fade-in-out 2s ease-in-out;
+}
+
+/* Progress bar */
+.progress-bar {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: var(--border);
+	overflow: hidden;
+}
+
+.progress-bar-fill {
+	height: 100%;
+	background: var(--accent);
+}
+
+/* Divider with text */
+.divider {
+	display: flex;
+	align-items: center;
+	margin: var(--space-xl) 0;
+	gap: var(--space-lg);
+}
+
+.divider::before,
+.divider::after {
+	content: '';
+	flex: 1;
+	height: 1px;
+	background: var(--border);
+}
+
+.divider span {
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+}
+
+/* Status message */
+.status-message {
+	margin: var(--space-md) 0 0;
+	padding: var(--space-sm) var(--space-md);
+	background: var(--bg);
+	border-radius: var(--radius-md);
+	font-size: var(--text-sm);
+	color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+
+@keyframes fade-in-out {
+	0%,
+	100% {
+		opacity: 0;
+	}
+	10%,
+	90% {
+		opacity: 1;
+	}
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
