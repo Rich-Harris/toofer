@@ -15,14 +15,11 @@
 		return cleanup;
 	});
 
-	function handleToggle() {
-		theme = toggleTheme();
-	}
 </script>
 
 <button
 	class="theme-toggle"
-	onclick={handleToggle}
+	onclick={() => { theme = toggleTheme(); }}
 	aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
 >
 	{#if theme === 'dark'}

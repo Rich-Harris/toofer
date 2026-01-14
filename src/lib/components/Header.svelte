@@ -4,19 +4,13 @@
 	import Logo from './Logo.svelte';
 	import * as accountStore from '$lib/stores/accounts.svelte';
 
-	let unlocked = $derived(accountStore.isUnlocked());
-
 	function handleLock() {
 		accountStore.lock();
 		goto('/');
 	}
-
-	function handleSettings() {
-		accountStore.toggleSettings();
-	}
 </script>
 
-{#if unlocked}
+{#if accountStore.isUnlocked()}
 	<header>
 		<div class="header-content">
 			<a href="/" class="logo">
@@ -27,7 +21,7 @@
 				<ThemeToggle />
 				<button
 					class="settings-btn"
-					onclick={handleSettings}
+					onclick={() => accountStore.toggleSettings()}
 					aria-label="Settings"
 				>
 					<svg

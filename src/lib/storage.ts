@@ -4,10 +4,6 @@ import { encrypt, decrypt } from './crypto';
 const VAULTS_INDEX_KEY = 'toofer_vaults';
 const VAULT_PREFIX = 'toofer_vault_';
 
-function generateId(): string {
-	return crypto.randomUUID();
-}
-
 export function getVaultList(): VaultInfo[] {
 	if (typeof localStorage === 'undefined') return [];
 	const stored = localStorage.getItem(VAULTS_INDEX_KEY);
@@ -29,7 +25,7 @@ export function hasVault(): boolean {
 }
 
 export async function createVault(name: string, accounts: Account[], passphrase: string): Promise<string> {
-	const id = generateId();
+	const id = crypto.randomUUID();
 	const vaultInfo: VaultInfo = {
 		id,
 		name,
