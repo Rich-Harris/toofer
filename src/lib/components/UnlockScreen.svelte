@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
 	import {
 		isPlatformAuthenticatorAvailable,
 		hasBiometricCredential,
@@ -42,19 +41,17 @@
 	let selectedVault = $derived(vaults.find((v) => v.id === selectedVaultId) ?? null);
 
 	$effect(() => {
-		untrack(() => {
-			vaults = getVaultList();
+		vaults = getVaultList();
 
-			// Auto-select first vault or show create view
-			if (vaults.length > 0) {
-				selectedVaultId = vaults[0].id;
-				currentView = 'unlock';
-			} else {
-				currentView = 'create';
-			}
+		// Auto-select first vault or show create view
+		if (vaults.length > 0) {
+			selectedVaultId = vaults[0].id;
+			currentView = 'unlock';
+		} else {
+			currentView = 'create';
+		}
 
-			checkBiometricAvailability();
-		});
+		checkBiometricAvailability();
 	});
 
 	async function checkBiometricAvailability() {
